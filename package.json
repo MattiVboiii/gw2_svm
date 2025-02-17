@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/react-icons": "^2.2.7",
     "@types/react-router": "^5.1.20",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-icons": "^5.4.0",
     "react-router": "^7.1.5"
   },
   "devDependencies": {

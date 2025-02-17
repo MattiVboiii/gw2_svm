@@ -1,0 +1,55 @@
+.banner {
+  background-color: black;
+  height: 50px;
+  width: 100%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+nav {
+}
+
+footer {
+  background-color: black;
+  color: white;
+  padding: 50px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 150px;
+  width: 100%;
+  div:first-child {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 0 10px;
+    h1 {
+      font-weight: bold;
+    }
+    p {
+      margin: 25px 0;
+    }
+  }
+  span {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: grey;
+  }
+}
+
+nav {
+  display: flex;
+  margin-right: auto;
+  justify-content: space-between;
+  h1 {
+    font-weight: bold;
+  }
+  ul {
+    display: flex;
+    gap: 20px;
+  }
+}
