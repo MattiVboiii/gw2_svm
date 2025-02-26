@@ -2,6 +2,7 @@ nav {
   display: flex;
   padding: 2vh 15vw;
   justify-content: space-between;
+  align-items: center;
   background-color: grey;
   h1 {
     font-weight: bold;
