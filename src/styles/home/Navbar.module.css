@@ -1,7 +1,8 @@
 nav {
   display: flex;
-  padding: 0 15vw;
+  padding: 2vh 15vw;
   justify-content: space-between;
+  background-color: grey;
   h1 {
     font-weight: bold;
   }
