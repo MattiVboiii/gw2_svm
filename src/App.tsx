@@ -1,11 +1,15 @@
-  import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Navbar from './components/Navbar';
 import '/src/styles/main.css';
 
 const App = () => {
   return (
     <>
       <Navbar />
-      <h1>Headless Clothing Store</h1>
+      <main>
+        <h1>Headless Clothing Store</h1>
+      </main>
+      <Footer />
     </>
   );
 };
