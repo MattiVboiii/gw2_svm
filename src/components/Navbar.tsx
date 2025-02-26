@@ -2,7 +2,7 @@ import { CiSearch } from 'react-icons/ci';
 import { CiHeart } from 'react-icons/ci';
 import { CiShoppingCart } from 'react-icons/ci';
 import { Link } from 'react-router';
-import '/src/styles/home/Navbar.css';
+import styles from '../styles/home/Navbar.module.css';
 
 const Navbar = () => {
   return (
@@ -24,7 +24,7 @@ const Navbar = () => {
           </li>
         </ul>
         <input type='text' placeholder='What are you looking for?' />
-        <ul className='icons'>
+        <ul className={`${styles.icons}`}>
           <CiSearch className='search-icon' />
           <CiHeart className='heart-icon' />
           <CiShoppingCart className='cart-icon' />
