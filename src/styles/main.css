@@ -7,3 +7,20 @@ body {
     flex-grow: 1;
   }
 }
+
+:root {
+  font-size: 62.5%;
+  --primaryWhite: #ffffff;
+  --primaryDarkGrey: #363738;
+  --secondaryWhite: #f5f5f5;
+  --secondaryWhite2: #fefaf1;
+  --text: #fafafa;
+  --txtgrey: #7d8184;
+  --grey: #c1c0c1;
+  --black: #000000;
+  --redAccent: #db4444;
+  --hoverButton: #e07575;
+  --yellowStars: #ffad33;
+  --buttonGreen: #00ff66;
+  --hoverButton2: #a0bce0;
+}
