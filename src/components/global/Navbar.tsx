@@ -2,7 +2,7 @@ import { CiSearch } from 'react-icons/ci';
 import { CiHeart } from 'react-icons/ci';
 import { CiShoppingCart } from 'react-icons/ci';
 import { Link } from 'react-router';
-import styles from '../styles/home/Navbar.module.css';
+import styles from '/src/styles/global/Navbar.module.css';
 
 const Navbar = () => {
   return (

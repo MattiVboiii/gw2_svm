@@ -1,4 +1,4 @@
-import styles from '../styles/home/Footer.module.css';
+import styles from '/src/styles/global/Footer.module.css';
 import { Link } from 'react-router';
 import {
   FaFacebookF,
