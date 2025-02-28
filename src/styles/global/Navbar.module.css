@@ -2,6 +2,7 @@ nav {
   display: flex;
   padding: 2vh 15vw;
   justify-content: space-between;
+  align-items: center;
   background-color: grey;
   h1 {
     font-weight: bold;
@@ -9,10 +10,22 @@ nav {
   ul {
     display: flex;
     gap: 20px;
+    li a {
+      text-decoration: none;
+      color: black;
+      transition: all 0.2s ease-in-out;
+      &:hover {
+        text-decoration: underline;
+        color: var(--redAccent);
+      }
+    }
     > :hover {
       transition: all 0.2s ease-in-out;
       cursor: pointer;
-      color: red;
+      color: var(--redAccent);
     }
+  }
+  .icons {
+    font-size: 1.5rem;
   }
 }
