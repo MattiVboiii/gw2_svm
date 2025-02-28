@@ -22,7 +22,7 @@ const Signup = () => {
 
   return (
     <div className={styles.signup_container}>
-      <img src='/src/assets/signup pic.jpg' alt='' />
+      <img src='/src/assets/signuplogin_cover.jpg' alt='' />
       <form className={styles.signup_form} onSubmit={handleSubmit}>
         <h1>Create an account</h1>
         <p>Enter your details below:</p>
