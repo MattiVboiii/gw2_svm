@@ -1,0 +1,35 @@
+.carousel_container {
+  width: 100%;
+  justify-content: space-between;
+  user-select: none;
+  .carousel_dot {
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    border: 0;
+    background-color: #ccc;
+    margin: 10px 5px;
+    &.active {
+      background-color: black;
+    }
+  }
+  .carousel_forward_btn,
+  .carousel_backward_btn {
+    align-self: center;
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 100%;
+    font-size: 24px;
+    margin: 10px;
+    cursor: pointer;
+    &:hover {
+      background: #333;
+    }
+  }
+}
+
+.carousel_image {
+  height: 100%;
+  display: block;
+}
