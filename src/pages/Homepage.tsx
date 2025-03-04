@@ -1,5 +1,5 @@
 import CategorySection from '../components/home/CategorySection';
-import CarouselSlider from '../components/global/Carousel';
+import Carousel from '../components/global/Carousel';
 
 const HomePage = () => {
   return (
@@ -10,7 +10,7 @@ const HomePage = () => {
           console.log(`Selected category: ${category}`)
         }
       />
-      <CarouselSlider />
+      <Carousel />
     </div>
   );
 };

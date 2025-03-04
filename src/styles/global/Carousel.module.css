@@ -10,7 +10,8 @@
     background-color: #ccc;
     margin: 10px 5px;
     &.active {
-      background-color: black;
+      background-color: var(--redAccent);
+      border: 2px solid black;
     }
   }
   .carousel_forward_btn,

@@ -12,7 +12,7 @@ const images = [
   'https://picsum.photos/1920/1080?random=6',
 ];
 
-const CarouselSlider = () => {
+const Carousel = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const speed = 1000;
@@ -30,7 +30,7 @@ const CarouselSlider = () => {
   }, []);
 
   if (isLoading) {
-    return null;
+    return <p>Loading...</p>;
   }
 
   return (
@@ -46,8 +46,6 @@ const CarouselSlider = () => {
       autoplay={true} // Enable autoplay functionality
       autoplayDelay={2500} // Delay duration for autoplay
       speed={speed} // Transition speed for slide change
-      updateOnItemClick // Update slide on item click
-      centerMode={true} // Enable centering of items
       dotsNav={{
         show: true, // Show dots navigation
         itemBtnProps: {
@@ -58,14 +56,14 @@ const CarouselSlider = () => {
         },
       }}
       forwardBtnProps={{
-        children: '>',
-        show: true,
-        className: styles.carousel_forward_btn,
+        show: false,
+        // children: '>',
+        // className: styles.carousel_forward_btn,
       }}
       backwardBtnProps={{
-        children: '<',
-        show: true,
-        className: styles.carousel_backward_btn,
+        show: false,
+        // children: '<',
+        // className: styles.carousel_backward_btn,
       }}
     >
       {images.map((image, index) => (
@@ -84,4 +82,4 @@ const CarouselSlider = () => {
   );
 };
 
-export default CarouselSlider;
+export default Carousel;
