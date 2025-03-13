@@ -1,5 +1,13 @@
-import { FaTshirt, FaFemale, FaHatCowboy, FaShoePrints, FaStar } from "react-icons/fa";
-import styles from "./categorySection.module.css";
+import { 
+  IoShirtOutline, 
+  IoWomanOutline,  
+  IoDiamondOutline, 
+  IoStarOutline 
+} from "react-icons/io5";
+import { SlHandbag } from "react-icons/sl";
+import { CiDiscount1 } from "react-icons/ci";
+
+import styles from "../../styles/home/CategorySection.module.css";
 
 // props
 interface CategorySectionProps {
@@ -7,12 +15,14 @@ interface CategorySectionProps {
   selectedCategory: string;
 }
 const categories = [
-    { name: "All", icon: <FaStar />, value: "all" },
-    { name: "Men", icon: <FaTshirt />, value: "men's clothing" },
-    { name: "Women", icon: <FaFemale />, value: "women's clothing" },
-    { name: "Accessories", icon: <FaHatCowboy />, value: "accessories" },
-    { name: "Limited Edition", icon: <FaShoePrints />, value: "limited-edition" }
-  ];
+  { name: "All", icon: <IoStarOutline />, value: "all" },
+  { name: "Men", icon: <IoShirtOutline />, value: "men's clothing" },
+  { name: "Women", icon: <IoWomanOutline />, value: "women's clothing" },
+  { name: "Accessories", icon: <SlHandbag />, value: "accessories" },
+  { name: "Limited Edition", icon: <IoDiamondOutline />, value: "limited-edition" },
+  { name: "Sale", icon: <CiDiscount1 />, value: "sale" }
+];
+
 
 const CategorySection: React.FC<CategorySectionProps> = ({ onCategorySelect, selectedCategory }) => {
     const handleCategoryClick = (category: string) => {
@@ -24,20 +34,26 @@ console.log(handleCategoryClick);
       
 return (
   <section className={styles.categorySection}>
-    <h2 className={styles.categoryTitle}>Browse By Category</h2>
-    <div className={styles.categoryContainer}>
-      {categories.map((category) => (
-        <button
-          key={category.value}
-          className={`${styles.categoryButton} ${selectedCategory === category.value ? styles.active : ""}`}
-          onClick={() => onCategorySelect(category.value)}
-        >
-          <span className={styles.categoryIcon}>{category.icon}</span>
-          {category.name}
-        </button>
-      ))}
-    </div>
-  </section>
+     <div className={styles.categoryHeader}>
+        <span className={styles.categoryRectangle}></span>
+        <p className={styles.categoryText}>Categories</p>
+      </div>
+  <h2 className={styles.categoryTitle}>Browse By Category</h2>
+  <div className={styles.categoryContainer}>
+    {categories.map((category) => (
+      <button
+        key={category.value}
+        className={`${styles.categoryButton} ${selectedCategory === category.value ? styles.active : ""}`}
+        onClick={() => onCategorySelect(category.value)}
+      >
+        <span className={styles.categoryIcon}>{category.icon}</span>
+        {category.name}
+      </button>
+    ))}
+  </div>
+</section>
+
+
 );
 
   };
