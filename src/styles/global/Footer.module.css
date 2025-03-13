@@ -1,12 +1,10 @@
 .footer_cover {
   background-color: black;
-  position: fixed;
   width: 100%;
   bottom: 0;
   footer {
     background-color: black;
     color: white;
-    margin-bottom: 10px;
     .footer_container {
       display: flex;
       justify-content: space-between;
