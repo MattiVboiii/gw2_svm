@@ -8,37 +8,56 @@
     .footer_container {
       display: flex;
       justify-content: space-between;
-      padding: 5vh 15vw;
+      padding: 5vh 5vw;
+
       h1 {
         font-weight: bold;
-        font-size: 1.25rem;
+        font-size: 1vw;
       }
       h2 {
-        font-weight: bold;
+        font-size: 1vw;
         margin-bottom: 2.5vh;
       }
       p {
+        font-size: 0.75vw;
         margin-bottom: 1vh;
       }
       a {
         text-decoration: none;
         color: white;
         transition: all 0.2s ease-in-out;
+        font-size: 0.75vw;
+        position: relative;
         &:hover {
-          cursor: pointer;
-          color: red;
-          text-decoration: underline;
+          color: var(--redAccent);
+        }
+        &::before {
+          content: '';
+          position: absolute;
+          width: 100%;
+          height: 0.15vh;
+          bottom: -0.5vh;
+          left: 0;
+          background-color: var(--redAccent);
+          visibility: hidden;
+          transform: scaleX(0);
+          transition: all 0.2s ease-in-out;
+        }
+        &:hover::before {
+          visibility: visible;
+          transform: scaleX(1);
         }
       }
       .icons {
         display: flex;
         gap: 10px;
-        font-size: 1.5rem;
       }
     }
     .copyright {
       text-align: center;
-      color: grey;
+      color: var(--primaryDarkGrey);
+      font-size: 0.75vw;
+      padding-bottom: 1vh;
     }
   }
 }

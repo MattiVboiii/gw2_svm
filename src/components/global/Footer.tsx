@@ -13,9 +13,9 @@ const Footer = () => {
       <footer>
         <div className={styles.footer_container}>
           <div>
-            <h1>
-              <Link to='/'>Headless Clothing Store</Link>
-            </h1>
+            <Link to='/'>
+              <h1>Headless Clothing Store</h1>
+            </Link>
           </div>
           <div>
             <h2>Support</h2>
