@@ -1,44 +1,84 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Product } from '../types';
+import { UnknownAction } from 'redux';
 import { RootState } from '.';
 
-export interface ProductsState {
+type ProductsState = {
   products: Product[];
   filteredProducts: Product[];
   currentPage: number;
-}
+};
 
+type Product = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  category: string;
+  image: string;
+  rating: {
+    rate: number;
+    count: number;
+  };
+};
+
+// initial state
 const initialState: ProductsState = {
   products: [],
   filteredProducts: [],
   currentPage: 1,
 };
 
-const productsSlice = createSlice({
-  name: 'products',
-  initialState,
-  reducers: {
-    getProducts: (state, action: PayloadAction<Product[]>) => {
-      state.products = action.payload;
-      state.filteredProducts = action.payload;
-    },
-    filterProducts: (state, action: PayloadAction<string>) => {
-      state.filteredProducts = state.products.filter((product) =>
-        product.category.includes(action.payload)
-      );
-    },
-    setPage: (state, action: PayloadAction<number>) => {
-      state.currentPage = action.payload;
-    },
-  },
+// ACTION TYPES
+const GET_PRODUCTS = 'GET_PRODUCTS';
+const FILTER_PRODUCTS = 'FILTER_PRODUCTS';
+const SET_PAGE = 'SET_PAGE';
+
+// ACTION CREATORS
+export const getProducts = (products: Product[]) => ({
+  type: GET_PRODUCTS,
+  payload: products,
 });
 
-export const { getProducts, filterProducts, setPage } = productsSlice.actions;
+export const filterProducts = (category: string) => ({
+  type: FILTER_PRODUCTS,
+  payload: category,
+});
 
-export const selectProducts = (state: RootState) => state.products.products;
-export const selectFilteredProducts = (state: RootState) =>
-  state.products.filteredProducts;
-export const selectCurrentPage = (state: RootState) =>
-  state.products.currentPage;
+export const setPage = (page: number) => ({
+  type: SET_PAGE,
+  payload: page,
+});
 
-export default productsSlice.reducer;
+// REDUCER
+const productsReducer = (state = initialState, action: UnknownAction) => {
+  switch (action.type) {
+    case GET_PRODUCTS:
+      return {
+        ...state,
+        products: action.payload,
+        filteredProducts: action.payload,
+      };
+    case FILTER_PRODUCTS:
+      return {
+        ...state,
+        filteredProducts: state.products.filter((product) =>
+          product.category.includes(action.payload as string)
+        ),
+      };
+    case SET_PAGE:
+      return {
+        ...state,
+        currentPage: action.payload as number,
+      };
+    default:
+      return state;
+  }
+};
+
+export const selectProducts = (storeState: RootState) =>
+  storeState.productsSlice.products;
+export const selectFilteredProducts = (storeState: RootState) =>
+  storeState.productsSlice.filteredProducts;
+export const selectCurrentPage = (storeState: RootState) =>
+  storeState.productsSlice.currentPage;
+
+export default productsReducer;
