@@ -1,10 +1,15 @@
-import { CiSearch } from 'react-icons/ci';
-import { CiHeart } from 'react-icons/ci';
-import { CiShoppingCart } from 'react-icons/ci';
+import { useState } from 'react';
+import { CiSearch, CiHeart, CiShoppingCart } from 'react-icons/ci';
 import { Link } from 'react-router';
 import styles from '/src/styles/global/Navbar.module.css';
 
 const Navbar = () => {
+  const [showSearch, setShowSearch] = useState(false);
+
+  const handleSearchClick = () => {
+    setShowSearch(!showSearch);
+  };
+
   return (
     <>
       <nav>
@@ -23,11 +28,19 @@ const Navbar = () => {
             <Link to='/signup'>Sign Up</Link>
           </li>
         </ul>
-        <input type='text' placeholder='What are you looking for?' />
+        {showSearch && (
+          <input type='text' placeholder='What are you looking for?' />
+        )}
         <ul className={`${styles.icons}`}>
-          <CiSearch className='search-icon' />
-          <CiHeart className='heart-icon' />
-          <CiShoppingCart className='cart-icon' />
+          <li>
+            <CiSearch className='search-icon' onClick={handleSearchClick} />
+          </li>
+          <li>
+            <CiHeart className='heart-icon' />
+          </li>
+          <li>
+            <CiShoppingCart className='cart-icon' />
+          </li>
         </ul>
       </nav>
     </>

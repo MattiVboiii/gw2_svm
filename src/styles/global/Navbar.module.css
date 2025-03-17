@@ -1,31 +1,69 @@
 nav {
   display: flex;
-  padding: 2vh 15vw;
   justify-content: space-between;
+  padding: 2vh 5vw;
   align-items: center;
-  background-color: grey;
+  border-bottom: 0.15vh solid var(--grey);
   h1 {
+    padding: 1vh 0;
+    font-size: 1vw;
     font-weight: bold;
   }
   ul {
     display: flex;
-    gap: 20px;
-    li a {
-      text-decoration: none;
-      color: black;
-      transition: all 0.2s ease-in-out;
-      &:hover {
-        text-decoration: underline;
-        color: var(--redAccent);
+    gap: 1vw;
+    li {
+      a {
+        text-decoration: none;
+        color: black;
+        transition: all 0.3s ease-in-out;
+        font-size: 0.75vw;
+        position: relative;
+        &:hover {
+          color: var(--redAccent);
+        }
+        &::before {
+          content: '';
+          position: absolute;
+          width: 100%;
+          height: 0.15vh;
+          bottom: -0.5vh;
+          left: 0;
+          background-color: var(--redAccent);
+          visibility: hidden;
+          transform: scaleX(0);
+          transition: all 0.3s ease-in-out;
+        }
+        &:hover::before {
+          visibility: visible;
+          transform: scaleX(1);
+        }
       }
     }
-    > :hover {
-      transition: all 0.2s ease-in-out;
-      cursor: pointer;
-      color: var(--redAccent);
+  }
+  input {
+    border: none;
+    background-color: var(--secondaryWhite);
+    padding: 1vh;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    position: relative;
+    left: 17vw;
+    font-size: 0.5vw;
+    &:focus {
+      outline: none;
+      border: 2px solid var(--redAccent);
     }
   }
   .icons {
-    font-size: 1.5rem;
+    font-size: 1vw;
+    li {
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      &:hover {
+        color: var(--redAccent);
+      }
+    }
   }
 }
