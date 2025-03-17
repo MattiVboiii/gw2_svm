@@ -5,7 +5,6 @@ const advantages = [
   { icon: <FaHeadset />, title: '24/7 Customer Service', text: 'Friendly 24/7 customer support' },
   { icon: <FaUndo />, title: 'Money Back Guarantee', text: 'We return money within 30 days' }
 ];
-
 const Advantages = () => {
   return (
     <section>
