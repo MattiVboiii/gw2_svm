@@ -35,7 +35,11 @@ const AllProducts = () => {
   }, [dispatch]);
 
   const handleFilterChange = (category: string) => {
-    dispatch(filterProducts(category));
+    if (category === 'all') {
+      dispatch(getProducts(products));
+    } else {
+      dispatch(filterProducts(category));
+    }
     dispatch(setPage(1));
   };
 
@@ -53,7 +57,9 @@ const AllProducts = () => {
       <h1>
         {filteredProducts.length === products.length
           ? 'All Products'
-          : `Products in ${filteredProducts[0]?.category}`}
+          : `Products in ${
+              filteredProducts.length ? filteredProducts[0]?.category : 'All'
+            }`}
       </h1>
       <div className={styles.category_buttons}>
         <button
@@ -73,7 +79,9 @@ const AllProducts = () => {
               key={category}
               type='button'
               className={
-                filteredProducts[0]?.category === category
+                filteredProducts.length > 0 &&
+                filteredProducts[0]?.category === category &&
+                filteredProducts.length !== products.length
                   ? styles.active_button
                   : undefined
               }
