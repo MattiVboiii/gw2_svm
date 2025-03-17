@@ -1,6 +1,6 @@
 import CategorySection from '../components/home/CategorySection';
 import Carousel from '../components/global/Carousel';
-
+import Advantages from '../components/home/Advantages';
 const HomePage = () => {
   return (
     <div>
@@ -11,6 +11,7 @@ const HomePage = () => {
         }
       />
       <Carousel />
+      <Advantages />
     </div>
   );
 };
