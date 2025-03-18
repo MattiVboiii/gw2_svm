@@ -14,15 +14,15 @@ export interface Product {
   images:      string[];
   variants:    Variant[];
   ratings:     number;
-  createdAt:   Date;
-  updatedAt:   Date;
+  createdAt:   string;
+  updatedAt:   string;
 }
 export interface Category {
   _id:         string;
   name:        string;
   description: string;
-  createdAt:   Date;
-  updatedAt:   Date;
+  createdAt:   string;
+  updatedAt:   string;
   category?:   string;
 }
 

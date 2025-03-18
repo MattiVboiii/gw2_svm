@@ -12,7 +12,8 @@ import {
   selectFilteredProducts,
   selectCurrentPage,
 } from '../store/productsSlice';
-
+import api from "../api";
+import { Product } from '../types'; // Adjust the import path as necessary
 const AllProducts = () => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts);
@@ -24,11 +25,8 @@ const AllProducts = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(
-          'https://webshop-api-wc6u.onrender.com/api/products'
-        );
-        const data = await response.json();
-        dispatch(getProducts(data));
+        const response = await api.get<Product[]>("/products"); 
+        dispatch(getProducts(response.data)); 
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -84,7 +82,7 @@ const AllProducts = () => {
               All
             </button>
             {Array.from(
-              new Set(products.map((product) => product.category.name))
+              new Set(products.map((product: Product) => product.category.name))
             ).map((categoryName) => (
               <button
                 key={categoryName}
