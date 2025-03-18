@@ -14,6 +14,7 @@ import {
 } from '../store/productsSlice';
 import api from "../api";
 import { Product } from '../types'; // Adjust the import path as necessary
+
 const AllProducts = () => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts);
@@ -25,7 +26,8 @@ const AllProducts = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get<Product[]>("/products"); 
+        const response = await api.get<Product[]>("/products");
+        console.log("Fetched products:", response.data); // TODO: Remove after testing 
         dispatch(getProducts(response.data)); 
         setIsLoading(false);
       } catch (error) {
@@ -65,7 +67,7 @@ const AllProducts = () => {
               ? 'All Products'
               : `Products in ${
                   filteredProducts.length
-                    ? filteredProducts[0]?.category.name
+                    ? filteredProducts[0]?.category?.name
                     : 'All'
                 }`}
           </h1>
@@ -82,14 +84,14 @@ const AllProducts = () => {
               All
             </button>
             {Array.from(
-              new Set(products.map((product: Product) => product.category.name))
+              new Set(products.map((product: Product) => product.category?.name)),
             ).map((categoryName) => (
               <button
-                key={categoryName}
+                key={String(categoryName)}
                 type='button'
                 className={
                   filteredProducts.length > 0 &&
-                  filteredProducts[0]?.category.name === categoryName &&
+                  filteredProducts[0]?.category?.name === categoryName &&
                   filteredProducts.length !== products.length
                     ? styles.active_button
                     : undefined
@@ -101,8 +103,8 @@ const AllProducts = () => {
             ))}
           </div>
           <section className={styles.product_container}>
-            {currentProducts.map((product) => (
-              <section key={product.id} className={styles.product}>
+            {currentProducts.map((product: Product) => (
+              <section key={product._id} className={styles.product}>
                 <img src={product.images[0]} alt={product.name} />
                 <button type='button'>
                   <IoCartOutline className={styles.cart_icon} />
@@ -121,7 +123,7 @@ const AllProducts = () => {
                     }
                   })}
                 </p>
-                <Link to={`/product/${product.id}`}>
+                <Link to={`/product/${product._id}`}>
                   <FaRegEye className={styles.eye_icon} />
                 </Link>
               </section>

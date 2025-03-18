@@ -57,13 +57,14 @@ const productsReducer = (state = initialState, action: ActionWithPayload<any>) =
         products: action.payload,
         filteredProducts: action.payload, // Initially, filtered products are the same as all products
       };
-    case FILTER_PRODUCTS:
-      return {
-        ...state,
-        filteredProducts: state.products.filter(
-          (product) => product.category.name === action.payload // Filters products by category
-        ),
-      };
+      case FILTER_PRODUCTS:
+        return {
+          ...state,
+          filteredProducts: state.products.filter(
+            (product) => product.category && product.category.name === action.payload
+          ),
+        };
+      
     case SET_PAGE:
       return {
         ...state,
