@@ -1,14 +1,26 @@
-type Product = {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  image: string;
-  rating: {
-    rate: number;
-    count: number;
-  };
+export type ProductsState = {
+  products: Product[];
+  filteredProducts: Product[];
+  currentPage: number;
 };
 
-export type { Product };
+export type Product = {
+  name: string;
+  description: string;
+  category: {
+    name: string;
+    description: string;
+  };
+  subcategory: {
+    name: string;
+    description: string;
+    category: string;
+  };
+  price: number;
+  images: string[];
+  variants: {
+    size: string;
+    color: string;
+  }[];
+  ratings: number;
+};
