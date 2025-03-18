@@ -13,6 +13,8 @@ import {
   selectFilteredProducts,
   selectCurrentPage,
 } from '../store/productsSlice';
+import api from "../api";
+import { Product } from '../types'; // Importing the Product type
 
 const AllProducts = () => {
   const dispatch = useDispatch();
@@ -21,15 +23,14 @@ const AllProducts = () => {
   const currentPage = useSelector(selectCurrentPage) as number;
   const productsPerPage = 5;
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [categories, setCategories] = useState<{ name: string; value: string }[]>([]);
 
+  // Fetch products from the API when the component mounts
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(
-          'https://webshop-api-wc6u.onrender.com/api/products'
-        );
-        const data = await response.json();
-        dispatch(getProducts(data));
+        const response = await api.get<Product[]>("/products");
+        dispatch(getProducts(response.data)); // Store products in Redux state
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -39,21 +40,38 @@ const AllProducts = () => {
     fetchProducts();
   }, [dispatch]);
 
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get<{ name: string }[]>('/categories');
+        const categoriesData = response.data.map((cat) => ({
+          name: cat.name,
+          value: cat.name.toLowerCase(),
+        }));
+        setCategories([{ name: "All", value: "all" }, ...categoriesData]);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Handle category filtering
   const handleFilterChange = (categoryName: string) => {
     if (categoryName === 'all') {
-      dispatch(getProducts(products));
+      dispatch(getProducts(products)); // Reset to all products
     } else {
-      dispatch(filterProducts(categoryName));
+      dispatch(filterProducts(categoryName)); // Filter products by category
     }
-    dispatch(setPage(1));
+    dispatch(setPage(1)); // Reset pagination to first page
   };
 
+  // Pagination calculations
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
   const paginate = (pageNumber: number) => dispatch(setPage(pageNumber));
 
@@ -68,44 +86,32 @@ const AllProducts = () => {
               ? 'All Products'
               : `Products in ${
                   filteredProducts.length
-                    ? filteredProducts[0]?.category.name
+                    ? filteredProducts[0]?.category?.name
                     : 'All'
                 }`}
           </h1>
+          {/* Category filter buttons */}
           <div className={styles.category_buttons}>
-            <button
-              type='button'
-              className={
-                filteredProducts.length === products.length
-                  ? styles.active_button
-                  : undefined
-              }
-              onClick={() => handleFilterChange('all')}
-            >
-              All
-            </button>
-            {Array.from(
-              new Set(products.map((product) => product.category.name))
-            ).map((categoryName) => (
+            {categories.map((category) => (
               <button
-                key={categoryName}
+                key={category.value}
                 type='button'
                 className={
                   filteredProducts.length > 0 &&
-                  filteredProducts[0]?.category.name === categoryName &&
-                  filteredProducts.length !== products.length
+                  filteredProducts[0]?.category?.name.toLowerCase() === category.value
                     ? styles.active_button
                     : undefined
                 }
-                onClick={() => handleFilterChange(categoryName)}
+                onClick={() => handleFilterChange(category.value)}
               >
-                {categoryName}
+                {category.name}
               </button>
             ))}
           </div>
+          {/* Product list */}
           <section className={styles.product_container}>
-            {currentProducts.map((product) => (
-              <section key={product.id} className={styles.product}>
+            {currentProducts.map((product: Product) => (
+              <section key={product._id} className={styles.product}>
                 <img src={product.images[0]} alt={product.name} />
                 <button type='button'>
                   <IoCartOutline className={styles.cart_icon} />
@@ -124,23 +130,20 @@ const AllProducts = () => {
                     }
                   })}
                 </p>
-                <Link to={`/product/${product.id}`}>
+                <Link to={`/product/${product._id}`}>
                   <FaRegEye className={styles.eye_icon} />
                 </Link>
               </section>
             ))}
           </section>
+          {/* Pagination controls */}
           <div className={styles.pagination}>
             {Array.from(
-              {
-                length: Math.ceil(filteredProducts.length / productsPerPage),
-              },
+              { length: Math.ceil(filteredProducts.length / productsPerPage) },
               (_, i) => (
                 <button
                   key={i + 1}
-                  className={
-                    currentPage === i + 1 ? styles.active_button : undefined
-                  }
+                  className={currentPage === i + 1 ? styles.active_button : undefined}
                   onClick={() => paginate(i + 1)}
                 >
                   {i + 1}
