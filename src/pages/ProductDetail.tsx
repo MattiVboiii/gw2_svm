@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { IoCartOutline, IoHeartOutline } from 'react-icons/io5';
 import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa';
+import { Product } from '../types';
 import styles from '../styles/home/ProductDetail.module.css';
 
 const ProductDetail = () => {
   const { slug } = useParams();
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const generateSlug = (name) => {
+  const generateSlug = (name: string) => {
     return name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
@@ -22,7 +23,7 @@ const ProductDetail = () => {
         const response = await fetch(
           'https://webshop-api-wc6u.onrender.com/api/products'
         );
-        const data = await response.json();
+        const data = (await response.json()) as Product[];
 
         // Find the product by comparing generated slugs
         const matchedProduct = data.find((p) => generateSlug(p.name) === slug);
