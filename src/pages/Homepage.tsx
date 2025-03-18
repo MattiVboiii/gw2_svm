@@ -1,19 +1,22 @@
 import CategorySection from '../components/home/CategorySection';
-import Carousel from '../components/global/Carousel';
+// import Carousel from '../components/global/Carousel';
 import Advantages from '../components/home/Advantages';
+import AllProducts from '../pages/AllProducts'; 
+
 const HomePage = () => {
   return (
     <div>
-      {/* TODO: Pass selectedCategory to AllProducts.tsx once filtering is implemented */}
-      <CategorySection
-        onCategorySelect={(category) =>
-          console.log(`Selected category: ${category}`)
-        }
-      />
-      <Carousel />
+     
+      <CategorySection />
+{/*      
+      <Carousel />  */}
+     
+      <AllProducts />
+     
       <Advantages />
     </div>
   );
 };
 
 export default HomePage;
+
