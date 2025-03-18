@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IoCartOutline } from 'react-icons/io5';
 import { FaRegStar, FaStar, FaStarHalfAlt, FaRegEye } from 'react-icons/fa';
 import { Link } from 'react-router';
+import { Product } from '../types';
 import styles from '../styles/home/AllProducts.module.css';
 import {
   getProducts,
@@ -15,11 +16,11 @@ import {
 
 const AllProducts = () => {
   const dispatch = useDispatch();
-  const products = useSelector(selectProducts);
-  const filteredProducts = useSelector(selectFilteredProducts);
-  const currentPage = useSelector(selectCurrentPage);
+  const products = useSelector(selectProducts) as Product[];
+  const filteredProducts = useSelector(selectFilteredProducts) as Product[];
+  const currentPage = useSelector(selectCurrentPage) as number;
   const productsPerPage = 5;
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
