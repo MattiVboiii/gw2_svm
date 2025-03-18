@@ -55,7 +55,6 @@ const ProductDetail = () => {
       <div className={styles.info}>
         <h1>{product.name}</h1>
         <p className={styles.price}>${product.price}</p>
-        <p className={styles.category}>Category: {product.category.name}</p>
         <p className={styles.description}>{product.description}</p>
         <div className={styles.ratings}>
           {[...Array(5)].map((_, i) => {
@@ -69,10 +68,10 @@ const ProductDetail = () => {
           })}
         </div>
         <button>
-          <IoCartOutline className={styles.cart_icon} /> Add to Cart
+          <IoCartOutline className={styles.icon} /> Add to Cart
         </button>
         <button>
-          <IoHeartOutline className={styles.heart_icon} /> Add to Wishlist
+          <IoHeartOutline className={styles.icon} /> Add to Wishlist
         </button>
       </div>
     </div>
