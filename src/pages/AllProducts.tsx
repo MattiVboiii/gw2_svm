@@ -21,6 +21,13 @@ const AllProducts = () => {
   const productsPerPage = 5;
   const [isLoading, setIsLoading] = useState(true);
 
+  const generateSlug = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -123,7 +130,7 @@ const AllProducts = () => {
                     }
                   })}
                 </p>
-                <Link to={`/product/${product.id}`}>
+                <Link to={`/product/${generateSlug(product.name)}`}>
                   <FaRegEye className={styles.eye_icon} />
                 </Link>
               </section>

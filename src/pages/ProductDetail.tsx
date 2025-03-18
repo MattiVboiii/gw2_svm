@@ -1,45 +1,63 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
-import { useDispatch, useSelector } from 'react-redux';
-import { IoCartOutline } from 'react-icons/io5';
+import { IoCartOutline, IoHeartOutline } from 'react-icons/io5';
 import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa';
 import styles from '../styles/home/ProductDetail.module.css';
-import { getProducts, selectProducts } from '../store/productsSlice';
 
 const ProductDetail = () => {
-  const { id } = useParams();
-  const dispatch = useDispatch();
-  const products = useSelector(selectProducts);
-  const product = products.find((product) => product.id === Number(id)) || null;
-  if (!product) return <p>Product not found</p>;
+  const { slug } = useParams();
+  const [product, setProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const generateSlug = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProducts = async () => {
       try {
         const response = await fetch(
-          `https://webshop-api-wc6u.onrender.com/api/products/${id}`
+          'https://webshop-api-wc6u.onrender.com/api/products'
         );
         const data = await response.json();
-        dispatch(getProducts(data));
+
+        // Find the product by comparing generated slugs
+        const matchedProduct = data.find((p) => generateSlug(p.name) === slug);
+
+        setProduct(matchedProduct || null);
+        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching product:', error);
       }
     };
 
-    fetchProduct();
-  }, [dispatch, id]);
+    fetchProducts();
+  }, [slug]);
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!product) {
+    return <p>Product not found.</p>;
+  }
 
   return (
-    <div className={styles.product_detail_page}>
-      <section className={styles.product}>
-        <img src={product.images[0]} alt={product.name} />
-        <button type='button'>
-          <IoCartOutline className={styles.cart_icon} />
-          Add to Cart
-        </button>
-        <h2>{product.name}</h2>
-        <p>${product.price}</p>
-        <p>
+    <div className={styles.product_detail}>
+      <img
+        src={product.images[0]}
+        alt={product.name}
+        className={styles.image}
+      />
+      <div className={styles.info}>
+        <h1>{product.name}</h1>
+        <p className={styles.price}>${product.price}</p>
+        <p className={styles.category}>Category: {product.category.name}</p>
+        <p className={styles.description}>{product.description}</p>
+        <div className={styles.ratings}>
           {[...Array(5)].map((_, i) => {
             if (i < Math.floor(product.ratings)) {
               return <FaStar key={i} color='gold' />;
@@ -49,9 +67,14 @@ const ProductDetail = () => {
               return <FaRegStar key={i} color='grey' />;
             }
           })}
-          <span>({product.ratings})</span>
-        </p>
-      </section>
+        </div>
+        <button>
+          <IoCartOutline className={styles.cart_icon} /> Add to Cart
+        </button>
+        <button>
+          <IoHeartOutline className={styles.heart_icon} /> Add to Wishlist
+        </button>
+      </div>
     </div>
   );
 };
