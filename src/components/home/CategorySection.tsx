@@ -1,62 +1,63 @@
-import { 
-  IoShirtOutline, 
-  IoWomanOutline,  
-  IoDiamondOutline, 
-  IoStarOutline 
-} from "react-icons/io5";
-import { SlHandbag } from "react-icons/sl";
-import { CiDiscount1 } from "react-icons/ci";
-
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { filterProducts, selectFilteredProducts } from "../../store/productsSlice";
+import api from "../../api"; // Подключаем API
 import styles from "../../styles/home/CategorySection.module.css";
+import { IoStarOutline } from "react-icons/io5";
 
-// props
-interface CategorySectionProps {
-  onCategorySelect: (category: string) => void;
-  selectedCategory: string;
-}
-const categories = [
-  { name: "All", icon: <IoStarOutline />, value: "all" },
-  { name: "Men", icon: <IoShirtOutline />, value: "men's clothing" },
-  { name: "Women", icon: <IoWomanOutline />, value: "women's clothing" },
-  { name: "Accessories", icon: <SlHandbag />, value: "accessories" },
-  { name: "Limited Edition", icon: <IoDiamondOutline />, value: "limited-edition" },
-  { name: "Sale", icon: <CiDiscount1 />, value: "sale" }
-];
+const CategorySection: React.FC = () => {
+  const dispatch = useDispatch();
+  const filteredProducts = useSelector(selectFilteredProducts);
+  const selectedCategory = filteredProducts.length > 0 ? filteredProducts[0]?.category?.name : "all";
 
+  const [categories, setCategories] = useState<{ name: string; value: string }[]>([]);
 
-const CategorySection: React.FC<CategorySectionProps> = ({ onCategorySelect, selectedCategory }) => {
-    const handleCategoryClick = (category: string) => {
-    console.log(`Category clicked: ${category}`); // log the selected category. TODO: Remove console.log after integrating with AllProducts.tsx
-    onCategorySelect(category);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get<{ name: string }[]>("/categories"); // Запрашиваем категории из API
+        const categoriesData = response.data.map((cat) => ({
+          name: cat.name,
+          value: cat.name.toLowerCase(),
+        }));
+        setCategories([{ name: "All", value: "all" }, ...categoriesData]); // Добавляем "All" в начало
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleCategoryClick = (category: string) => {
+    dispatch(filterProducts(category)); // Фильтруем товары через Redux
   };
-  // fixing the error in the console. TODO: Remove console.log after integrating with AllProducts.tsx
-console.log(handleCategoryClick);
-      
-return (
-  <section className={styles.categorySection}>
-     <div className={styles.categoryHeader}>
+
+  return (
+    <section className={styles.categorySection}>
+      <div className={styles.categoryHeader}>
         <span className={styles.categoryRectangle}></span>
         <p className={styles.categoryText}>Categories</p>
       </div>
-  <h2 className={styles.categoryTitle}>Browse By Category</h2>
-  <div className={styles.categoryContainer}>
-    {categories.map((category) => (
-      <button
-        key={category.value}
-        className={`${styles.categoryButton} ${selectedCategory === category.value ? styles.active : ""}`}
-        onClick={() => onCategorySelect(category.value)}
-      >
-        <span className={styles.categoryIcon}>{category.icon}</span>
-        {category.name}
-      </button>
-    ))}
-  </div>
-</section>
+      <h2 className={styles.categoryTitle}>Browse By Category</h2>
+      <div className={styles.categoryContainer}>
+        {categories.length > 0 ? (
+          categories.map((category) => (
+            <button
+              key={category.value}
+              className={`${styles.categoryButton} ${selectedCategory === category.value ? styles.active : ""}`}
+              onClick={() => handleCategoryClick(category.value)}
+            >
+              {category.name === "All" ? <IoStarOutline /> : null}
+              {category.name}
+            </button>
+          ))
+        ) : (
+          <p>Loading categories...</p>
+        )}
+      </div>
+    </section>
+  );
+};
 
-
-);
-
-  };
-  
-  
-  export default CategorySection;
+export default CategorySection;

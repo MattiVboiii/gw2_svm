@@ -58,12 +58,14 @@ const productsReducer = (state = initialState, action: ActionWithPayload<any>) =
         filteredProducts: action.payload, // Initially, filtered products are the same as all products
       };
       case FILTER_PRODUCTS:
-        return {
-          ...state,
-          filteredProducts: state.products.filter(
-            (product) => product.category && product.category.name === action.payload
-          ),
-        };
+  return {
+    ...state,
+    filteredProducts: state.products.filter((product) => {
+      const categoryName = product.category?.name.trim().toLowerCase(); // Убираем пробелы и делаем lowercase
+      const filterName = action.payload.trim().toLowerCase(); // Убираем пробелы и делаем lowercase
+      return categoryName === filterName;
+    }),
+  };
       
     case SET_PAGE:
       return {
