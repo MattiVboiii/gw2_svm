@@ -1,24 +1,6 @@
 import { UnknownAction } from 'redux';
 import { RootState } from '.';
-
-type ProductsState = {
-  products: Product[];
-  filteredProducts: Product[];
-  currentPage: number;
-};
-
-type Product = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  image: string;
-  rating: {
-    rate: number;
-    count: number;
-  };
-};
+import { Product, ProductsState } from '../types';
 
 // initial state
 const initialState: ProductsState = {
@@ -60,8 +42,8 @@ const productsReducer = (state = initialState, action: UnknownAction) => {
     case FILTER_PRODUCTS:
       return {
         ...state,
-        filteredProducts: state.products.filter((product) =>
-          product.category.includes(action.payload as string)
+        filteredProducts: state.products.filter(
+          (product) => product.category.name === action.payload
         ),
       };
     case SET_PAGE:
