@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { filterProducts, selectFilteredProducts } from "../../store/productsSlice";
-import api from "../../api"; // Подключаем API
+import api from "../../api"; 
 import styles from "../../styles/home/CategorySection.module.css";
 import { IoStarOutline } from "react-icons/io5";
 
@@ -15,12 +15,12 @@ const CategorySection: React.FC = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await api.get<{ name: string }[]>("/categories"); // Запрашиваем категории из API
+        const response = await api.get<{ name: string }[]>("/categories");
         const categoriesData = response.data.map((cat) => ({
           name: cat.name,
           value: cat.name.toLowerCase(),
         }));
-        setCategories([{ name: "All", value: "all" }, ...categoriesData]); // Добавляем "All" в начало
+        setCategories([{ name: "All", value: "all" }, ...categoriesData]); 
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -30,7 +30,12 @@ const CategorySection: React.FC = () => {
   }, []);
 
   const handleCategoryClick = (category: string) => {
-    dispatch(filterProducts(category)); // Фильтруем товары через Redux
+    console.log("Clicked category:", category);
+    if (category === "all") {
+      dispatch(filterProducts("")); 
+    } else {
+      dispatch(filterProducts(category));
+    }
   };
 
   return (

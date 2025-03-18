@@ -60,12 +60,11 @@ const productsReducer = (state = initialState, action: ActionWithPayload<any>) =
       case FILTER_PRODUCTS:
   return {
     ...state,
-    filteredProducts: state.products.filter((product) => {
-      const categoryName = product.category?.name.trim().toLowerCase(); // Убираем пробелы и делаем lowercase
-      const filterName = action.payload.trim().toLowerCase(); // Убираем пробелы и делаем lowercase
-      return categoryName === filterName;
-    }),
+    filteredProducts: action.payload
+      ? state.products.filter((product) => product.category?.name.toLowerCase() === action.payload.toLowerCase())
+      : state.products, 
   };
+
       
     case SET_PAGE:
       return {
