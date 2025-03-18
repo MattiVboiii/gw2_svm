@@ -1,22 +1,34 @@
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { IoCartOutline } from 'react-icons/io5';
 import { FaRegStar, FaStar, FaStarHalfAlt, FaRegEye } from 'react-icons/fa';
 import { Link } from 'react-router';
 import styles from '../styles/home/AllProducts.module.css';
+import {
+  getProducts,
+  filterProducts,
+  setPage,
+  selectProducts,
+  selectFilteredProducts,
+  selectCurrentPage,
+} from '../store/productsSlice';
 
 const AllProducts = () => {
-  const [products, setProducts] = useState<Array<any>>([]);
-  const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
+  const dispatch = useDispatch();
+  const products = useSelector(selectProducts);
+  const filteredProducts = useSelector(selectFilteredProducts);
+  const currentPage = useSelector(selectCurrentPage);
+  const productsPerPage = 5;
   const [isLoading, setIsLoading] = useState(true);
-  const productsPerPage = 8;
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://fakestoreapi.com/products');
+        const response = await fetch(
+          'https://webshop-api-wc6u.onrender.com/api/products'
+        );
         const data = await response.json();
-        setProducts(data);
+        dispatch(getProducts(data));
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -24,19 +36,16 @@ const AllProducts = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [dispatch]);
 
-  const handleFilterChange = (category: string) => {
-    setActiveCategory(category);
-    setCurrentPage(1);
-  };
-
-  const filteredProducts = products.filter((product) => {
-    if (activeCategory === 'all') {
-      return true;
+  const handleFilterChange = (categoryName: string) => {
+    if (categoryName === 'all') {
+      dispatch(getProducts(products));
+    } else {
+      dispatch(filterProducts(categoryName));
     }
-    return product.category === activeCategory;
-  });
+    dispatch(setPage(1));
+  };
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -45,7 +54,7 @@ const AllProducts = () => {
     indexOfLastProduct
   );
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber: number) => dispatch(setPage(pageNumber));
 
   return (
     <div className={styles.all_products}>
@@ -54,56 +63,65 @@ const AllProducts = () => {
       ) : (
         <>
           <h1>
-            {activeCategory === 'all'
+            {filteredProducts.length === products.length
               ? 'All Products'
-              : `Products in ${activeCategory}`}
+              : `Products in ${
+                  filteredProducts.length
+                    ? filteredProducts[0]?.category.name
+                    : 'All'
+                }`}
           </h1>
           <div className={styles.category_buttons}>
             <button
               type='button'
               className={
-                activeCategory === 'all' ? styles.active_button : undefined
+                filteredProducts.length === products.length
+                  ? styles.active_button
+                  : undefined
               }
               onClick={() => handleFilterChange('all')}
             >
               All
             </button>
             {Array.from(
-              new Set(products.map((product) => product.category))
-            ).map((category) => (
+              new Set(products.map((product) => product.category.name))
+            ).map((categoryName) => (
               <button
-                key={category}
+                key={categoryName}
                 type='button'
                 className={
-                  activeCategory === category ? styles.active_button : undefined
+                  filteredProducts.length > 0 &&
+                  filteredProducts[0]?.category.name === categoryName &&
+                  filteredProducts.length !== products.length
+                    ? styles.active_button
+                    : undefined
                 }
-                onClick={() => handleFilterChange(category)}
+                onClick={() => handleFilterChange(categoryName)}
               >
-                {category}
+                {categoryName}
               </button>
             ))}
           </div>
           <section className={styles.product_container}>
             {currentProducts.map((product) => (
               <section key={product.id} className={styles.product}>
-                <img src={product.image} alt={product.title} />
+                <img src={product.images[0]} alt={product.name} />
                 <button type='button'>
                   <IoCartOutline className={styles.cart_icon} />
                   Add to Cart
                 </button>
-                <h2>{product.title}</h2>
+                <h2>{product.name}</h2>
                 <p>${product.price}</p>
                 <p>
                   {[...Array(5)].map((_, i) => {
-                    if (i < Math.floor(product.rating.rate)) {
+                    if (i < Math.floor(product.ratings)) {
                       return <FaStar key={i} color='gold' />;
-                    } else if (i === Math.floor(product.rating.rate)) {
+                    } else if (i === Math.floor(product.ratings)) {
                       return <FaStarHalfAlt key={i} color='gold' />;
                     } else {
                       return <FaRegStar key={i} color='grey' />;
                     }
                   })}
-                  <span>({product.rating.count})</span>
                 </p>
                 <Link to={`/product/${product.id}`}>
                   <FaRegEye className={styles.eye_icon} />
