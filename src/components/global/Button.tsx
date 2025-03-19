@@ -1,40 +1,41 @@
 import React from "react";
-import styles from "../../styles/global/Button.module.css"; // Import CSS module for styling
+import styles from "../../styles/global/Button.module.css"; // Import global styles
 
-// Define the prop types for the Button component
+// Define Button Props
 interface ButtonProps {
-  children: React.ReactNode; // Button label or content inside
-  variant?: "primary" | "secondary"; // Button style variation
-  size?: "small" | "medium" | "large"; // Button size options
-  onClick?: () => void; // Function triggered when button is clicked
-  icon?: React.ReactNode; // Optional icon inside the button
-  iconPosition?: "left" | "right"; // Position of the icon
+  children?: React.ReactNode; // Button label or content
+  variant?: "primary" | "secondary"; // Button type
+  size?: "small" | "medium" | "large"; // Size of the button
+  onClick?: () => void; // Click handler
+  icon?: React.ReactNode; // Optional icon
+  iconPosition?: "left" | "right"; // Icon alignment
+  className?: string; // Allow additional styles
 }
 
-// Functional Button Component
 const Button: React.FC<ButtonProps> = ({
   children,
-  variant = "primary", // Default to "primary" style
-  size = "medium", // Default to "medium" size
+  variant = "primary",
+  size = "medium",
   onClick,
   icon,
-  iconPosition = "left", // Default icon position is left
+  iconPosition = "left",
+  className = "",
 }) => {
   return (
     <button
-      className={`${styles.button} ${styles[variant]} ${styles[size]}`} // Dynamic styling based on props
-      onClick={onClick} // Attach click event handler
+      className={`${styles.button} ${styles[variant]} ${styles[size]} ${className}`}
+      onClick={onClick}
     >
-      {/* Render icon on the left */}
-      {icon && iconPosition === "left" && <span className={styles.icon}>{icon}</span>} 
+      {/* Icon on the left */}
+      {icon && iconPosition === "left" && <span className={styles.icon}>{icon}</span>}
       
-      {/* Render button label */}
+      {/* Button Label */}
       {children}
-
-      {/* Render icon on the right */}
+      
+      {/* Icon on the right */}
       {icon && iconPosition === "right" && <span className={styles.icon}>{icon}</span>}
     </button>
   );
 };
 
-export default Button; // Export component for use in other parts of the project
+export default Button;
