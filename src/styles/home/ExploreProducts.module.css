@@ -1,0 +1,242 @@
+/* Main section styling */
+.explore_section {
+  padding: 5vh 5vw;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Section header (red rectangle + text) */
+.section_header {
+  display: flex;
+  align-items: center;
+  gap: 0.5vw;
+  margin-bottom: 2vh;
+}
+
+.red_rectangle {
+  width: 0.5vw;
+  height: 2vh;
+  background-color: var(--redAccent);
+  border-radius: 10px;
+}
+
+.section_text {
+  font-size: 1.6vh;
+  font-weight: bold;
+  color: var(--redAccent);
+}
+
+/* Section title */
+.section_title {
+  font-size: 3.6vh;
+  font-weight: bold;
+  text-align: left;
+  margin-bottom: 5vh;
+  color: var(--black);
+}
+
+/* Product container (scrollable by default) */
+.product_container {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1.5vw;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 2vh;
+  scrollbar-width: none;
+  min-height: 300px; /* Prevents jumping when switching to grid */
+}
+
+/* When all products are visible, switch to grid */
+.product_container.all_products_active {
+  display: grid !important;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(250px, 1fr)
+  ); /* Ensures multiple columns */
+  grid-template-rows: auto;
+  gap: 2rem;
+  justify-content: center;
+  align-items: start;
+  overflow-x: hidden !important;
+}
+
+/* Prevents single-column layout on large screens */
+@media (min-width: 768px) {
+  .product_container.all_products_active {
+    grid-template-columns: repeat(
+      3,
+      minmax(250px, 1fr)
+    ); /* At least 3 columns */
+  }
+}
+
+@media (min-width: 1024px) {
+  .product_container.all_products_active {
+    grid-template-columns: repeat(
+      4,
+      minmax(250px, 1fr)
+    ); /* At least 4 columns */
+  }
+}
+
+/* Hide scrollbar */
+.product_container::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+/* Individual product card */
+.product_card {
+  min-width: 250px;
+  max-width: 250px;
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease-in-out;
+  position: relative;
+}
+
+/* Wishlist button (heart icon) */
+.wishlist_button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.8rem;
+  color: var(--black);
+  transition: color 0.2s ease-in-out;
+}
+
+.wishlist_button:hover {
+  color: var(--redAccent);
+}
+
+/* Product image */
+.product_image {
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+/* Product name */
+.product_name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* Product description */
+.product_description {
+  font-size: 1rem;
+  color: var(--grey);
+  margin-bottom: 1rem;
+}
+
+/* Price */
+.product_price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--redAccent);
+  margin-bottom: 1rem;
+}
+
+/* Rating */
+.product_rating {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+/* Add to Cart button */
+.add_to_cart {
+  width: 100%;
+  background: var(--black);
+  color: white;
+  padding: 0.8rem;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  border-radius: 5px;
+}
+
+.add_to_cart:hover {
+  background: var(--hoverButton);
+}
+
+.cart_icon {
+  font-size: 1.5rem;
+}
+
+/* View All Products button */
+.view_all_button {
+  display: block;
+  margin: 3vh auto;
+  background: var(--redAccent);
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.view_all_button:hover {
+  background: var(--hoverButton);
+}
+
+/* Arrows (left & right navigation) */
+.arrow_left,
+.arrow_right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-size: 2rem;
+  padding: 0.5rem;
+  box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease-in-out;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow_left:hover,
+.arrow_right:hover {
+  background: var(--hoverButton);
+  color: white;
+}
+
+/* Left arrow position */
+.arrow_left {
+  left: -3vw;
+}
+
+/* Right arrow position */
+.arrow_right {
+  right: -3vw;
+}
+
+/* Show arrows on hover */
+.explore_section:hover .arrow_left {
+  left: 1vw;
+}
+
+.explore_section:hover .arrow_right {
+  right: 1vw;
+}
