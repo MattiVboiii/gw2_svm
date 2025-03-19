@@ -1,0 +1,125 @@
+.product_detail {
+  display: flex;
+  flex-direction: row;
+  padding: 5vh 10vw;
+  gap: 5vw;
+  .image {
+    width: 50vw;
+    height: 60vh;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2vh;
+    transition: all 0.2s ease-in-out;
+    &:hover {
+      box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.4);
+      transform: scale(1.05);
+    }
+  }
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    width: 40vw;
+    h1 {
+      font-size: 2.5vw;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .price {
+      font-size: 2vw;
+      font-weight: bold;
+      color: var(--redAccent);
+      margin-top: 1vh;
+    }
+    .category {
+      font-size: 1.2vw;
+      color: grey;
+      font-weight: 500;
+    }
+    .description {
+      font-size: 1.1vw;
+      color: #666;
+      line-height: 1.6;
+      margin-top: 2vh;
+      text-align: left;
+    }
+    .ratings {
+      display: flex;
+      gap: 0.1vw;
+      margin-top: 1.5vh;
+      font-size: 1.2vw;
+    }
+    button {
+      border: none;
+      background: var(--black);
+      color: white;
+      padding: 1.2rem;
+      margin-top: 2vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+      border-radius: 0.8vw;
+      font-size: 1.2vw;
+      text-transform: uppercase;
+      font-weight: 600;
+      width: 100%;
+      justify-content: center;
+      &:hover {
+        background: var(--hoverButton);
+      }
+      .icon {
+        margin-right: 0.6rem;
+        font-size: 2vw;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .product_detail {
+    flex-direction: column;
+    padding: 5rem 5vw;
+    gap: 2rem;
+    .image {
+      height: auto;
+      margin: 0 auto;
+      padding: 0 5vw;
+    }
+    .info {
+      width: 100%;
+      gap: 1rem;
+      h1 {
+        font-size: 2.5rem;
+        margin: 0;
+        margin-top: 2rem;
+      }
+      .price {
+        font-size: 1.8rem;
+        margin: 0;
+      }
+      .category {
+        font-size: 1.2rem;
+      }
+      .description {
+        font-size: 1rem;
+        margin: 0;
+      }
+      .ratings {
+        font-size: 1.2rem;
+        margin: 0;
+      }
+      button {
+        padding: 1rem;
+        font-size: 1.5rem;
+        .icon {
+          font-size: 2rem;
+        }
+      }
+    }
+  }
+}

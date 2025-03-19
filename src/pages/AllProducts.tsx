@@ -26,6 +26,13 @@ const AllProducts = () => {
     { name: string; value: string }[]
   >([]);
 
+  const generateSlug = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
   // Fetch products from the API when the component mounts
   useEffect(() => {
     const fetchProducts = async () => {
@@ -136,7 +143,7 @@ const AllProducts = () => {
                     }
                   })}
                 </p>
-                <Link to={`/product/${product._id}`}>
+                <Link to={`/product/${generateSlug(product.name)}`}>
                   <FaRegEye className={styles.eye_icon} />
                 </Link>
               </section>
