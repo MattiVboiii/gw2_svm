@@ -10,54 +10,26 @@ This document explains how to use the **global Button Component** in your projec
 
 Instead of using regular <button> elements, use the new Button component.
 
-Basic Usage
-
-import Button from "../global/Button"; // Adjust the path if necessary
-
-<Button onClick={() => console.log("Button clicked!")}> Click Me </Button>
-
-Example: Add to Cart Button in ExploreProducts.tsx
-Replace the old button with the new Button component.
-
-❌ Before (Old Button)
-<button className={styles.add_to_cart}>
-<IoCartOutline className={styles.cart_icon} />
-<span>Add to Cart</span>
-</button>
-
-✅ After (New Button Component)
-import Button from "../global/Button"; // Import the new Button component
-
-<Button
-variant="primary"
-size="medium"
-icon={<IoCartOutline />}
-onClick={() => console.log("Added to cart!")}
-
-> Add to Cart
-> </Button>
-
-Now, the button follows global styles and can be used everywhere!
-
 # Button Variants & Sizes
 
 The button supports different styles (variants), sizes, and icons.
 
-🔴 Primary Button (Red)
+{/_ Primary Buttons _/}
+<Button variant="primary" size="small">Primary Small</Button>
+<Button variant="primary" size="medium">Primary Medium</Button>
+<Button variant="primary" size="large">Primary Large</Button>
 
-<Button variant="primary" size="large" onClick={() => alert("Primary Button Clicked!")}>
-Buy Now
-</Button>
-⚪ Secondary Button (White with Black Border)
+{/_ Secondary Buttons _/}
+<Button variant="secondary" size="small">Secondary Small</Button>
+<Button variant="secondary" size="medium">Secondary Medium</Button>
+<Button variant="secondary" size="large">Secondary Large</Button>
 
-<Button variant="secondary" size="small" onClick={() => alert("Secondary Button Clicked!")}>
-Learn More
-</Button>
-🛒 Button with Icon
+{/_ Buttons with Icons _/}
+<Button variant="primary" size="medium" icon="🔥">Primary with Icon</Button>
+<Button variant="secondary" size="medium" icon="⚡" iconPosition="right">Secondary with Right Icon</Button>
 
-<Button variant="primary" size="medium" icon={<IoCartOutline />} onClick={() => alert("Cart clicked!")}>
-Add to Cart
-</Button>
+{/_ Clickable Button _/}
+<Button variant="primary" size="large" onClick={() => alert("Button Clicked!")}>Click Me</Button>
 
 # Debugging Issues
 
@@ -67,5 +39,22 @@ Button not rendering?
 → Check if the import path to Button.tsx is correct.
 Button not working?
 → Add console.log inside onClick to debug.
+
+# Summary: What You Can Do with the Button Component
+
+✅ Customize Button Styles
+
+Use variant="primary" for a red button.
+Use variant="secondary" for a white-bordered button.
+✅ Adjust Button Sizes
+
+size="small", size="medium", size="large"
+✅ Add Icons to Buttons
+
+Use icon={<IoCartOutline />} to add an icon.
+Use iconPosition="right" to move the icon to the right.
+✅ Handle Click Events
+
+Attach functions using onClick={() => console.log("Clicked!")}.
 
 By using a global button component, we ensure consistency and reusability across the project. 🚀
