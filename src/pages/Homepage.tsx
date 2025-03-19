@@ -1,8 +1,7 @@
 import CategorySection from '../components/home/CategorySection';
 // import Carousel from '../components/global/Carousel';
-import Advantages from '../components/home/Advantages';
-import AllProducts from '../pages/AllProducts'; 
-
+import Advantages from '../components/home/Advantages'; 
+import ExploreProducts from '../components/home/ExploreProducts';
 const HomePage = () => {
   return (
     <div>
@@ -11,7 +10,7 @@ const HomePage = () => {
 {/*      
       <Carousel />  */}
      
-      <AllProducts />
+     <ExploreProducts />
      
       <Advantages />
     </div>
