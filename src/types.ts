@@ -2,32 +2,33 @@ export type ProductsState = {
   products: Product[];
   filteredProducts: Product[];
   currentPage: number;
+  productsPerPage: number;
 };
 
 export interface Product {
-  _id:         string;
-  name:        string;
+  _id: string;
+  name: string;
   description: string;
-  category:    Category;
+  category: Category;
   subcategory: Category;
-  price:       number;
-  images:      string[];
-  variants:    Variant[];
-  ratings:     number;
-  createdAt:   string;
-  updatedAt:   string;
+  price: number;
+  images: string[];
+  variants: Variant[];
+  ratings: number;
+  createdAt: string;
+  updatedAt: string;
 }
 export interface Category {
-  _id:         string;
-  name:        string;
+  _id: string;
+  name: string;
   description: string;
-  createdAt:   string;
-  updatedAt:   string;
-  category?:   string;
+  createdAt: string;
+  updatedAt: string;
+  category?: string;
 }
 
 export interface Variant {
-  _id:   string;
-  size:  string;
+  _id: string;
+  size: string;
   color: string;
 }
