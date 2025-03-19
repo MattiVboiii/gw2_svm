@@ -5,15 +5,23 @@
     margin-bottom: 20px;
     font-weight: bold;
   }
+  .products_per_page {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    label {
+      font-size: 1.5rem;
+    }
+  }
   .category_buttons {
     display: flex;
     justify-content: center;
-    gap: 1vw;
+    gap: 0.5rem;
     button {
       border: none;
       background: var(--black);
       color: white;
-      padding: 1vh 1.5rem;
+      padding: 2rem 1rem;
       transition: all 0.2s ease-in-out;
       cursor: pointer;
       border-radius: 5px;
@@ -40,70 +48,75 @@
       border-radius: 5px;
       padding: 1.5rem;
       transition: all 0.2s ease-in-out;
-      img {
-        height: 20vh;
-        max-width: 75%;
-        object-fit: contain;
-        object-position: center;
-        margin: 1vw auto;
-        transition: all 0.2s ease-in-out;
-      }
-      button {
-        border: none;
-        border-bottom-left-radius: 0.5rem;
-        border-bottom-right-radius: 0.5rem;
-        background: var(--black);
-        color: white;
-        padding: 1rem;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: all 0.2s ease-in-out;
-        cursor: pointer;
-        font-size: 1.5rem;
-        .cart_icon {
-          margin-right: 1rem;
+      a {
+        text-decoration: none;
+        color: inherit;
+        img {
+          height: 20vh;
+          width: 100%;
+          object-fit: contain;
+          object-position: center;
+          margin: 1vh auto;
+          transition: all 0.2s ease-in-out;
+        }
+        button {
+          background: transparent;
+          border: none;
+        }
+        .wishlist_button {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          color: var(--black);
+          font-size: 1.5rem;
+          transition: all 0.2s ease-in-out;
+          &:hover {
+            color: var(--redAccent);
+          }
+        }
+        .ratings {
+          margin-bottom: 1vh;
+        }
+        .cart_button {
+          border: none;
+          border-bottom-left-radius: 0.5rem;
+          border-bottom-right-radius: 0.5rem;
+          background: var(--black);
           color: white;
-          font-size: 3rem;
+          padding: 1rem;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transition: all 0.2s ease-in-out;
+          cursor: pointer;
+          font-size: 1.5rem;
+          &:hover {
+            background: var(--hoverButton);
+          }
         }
-        &:hover {
-          background: var(--hoverButton);
+        h2,
+        p {
+          margin: 0.5vh 0;
+          line-height: 1.5;
+          font-size: 1.5rem;
         }
-      }
-      h2,
-      p {
-        margin: 0.5vh 0;
-        line-height: 1.5;
-        font-size: 1.5rem;
-      }
-      h2 {
-        font-weight: bold;
-        margin-top: 1vh;
-      }
-      p:first-of-type {
-        /* price */
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--redAccent);
-      }
-      p:nth-of-type(2) {
-        /* stars */
-        display: flex;
-        align-items: center;
-      }
-      .eye_icon {
-        color: black;
-        position: absolute;
-        top: 0;
-        right: 0;
-        margin: 2rem;
-        font-size: 1.5rem;
-        color: grey;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        &:hover {
-          color: var(--grey);
+        h2 {
+          font-weight: bold;
+        }
+        p:first-of-type {
+          /* price */
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: var(--redAccent);
+        }
+        p:nth-of-type(2) {
+          /* stars */
+          display: flex;
+          align-items: center;
         }
       }
       &:hover {
@@ -117,7 +130,7 @@
   .pagination {
     display: flex;
     justify-content: center;
-    gap: 0.5vw;
+    gap: 0.5rem;
     button {
       border: none;
       background: var(--black);
@@ -126,8 +139,8 @@
       transition: all 0.2s ease-in-out;
       cursor: pointer;
       border-radius: 5px;
-      width: 2vw;
-      height: 3vh;
+      width: 5rem;
+      height: 3rem;
       display: flex;
       justify-content: center;
       align-items: center;

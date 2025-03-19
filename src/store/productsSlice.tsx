@@ -9,12 +9,14 @@ const initialState: ProductsState = {
   products: [],
   filteredProducts: [],
   currentPage: 1,
+  productsPerPage: 5,
 };
 
 // Action types
 const GET_PRODUCTS = "GET_PRODUCTS";
 const FILTER_PRODUCTS = "FILTER_PRODUCTS";
 const SET_PAGE = "SET_PAGE";
+const SET_PRODUCTS_PER_PAGE = "SET_PRODUCTS_PER_PAGE";
 
 // Action creators: functions to dispatch actions
 export const getProducts = (products: Product[]) => ({
@@ -32,6 +34,11 @@ export const setPage = (page: number) => ({
   payload: page,
 });
 
+export const setProductsPerPage = (productsPerPage: number) => ({
+  type: SET_PRODUCTS_PER_PAGE,
+  payload: productsPerPage,
+});
+
 // Async action to fetch products from API using Axios
 export const fetchProducts = () => async (dispatch: Dispatch) => {
   try {
@@ -42,14 +49,16 @@ export const fetchProducts = () => async (dispatch: Dispatch) => {
   }
 };
 
-
 // Generic action type with payload
 interface ActionWithPayload<T> extends Action {
   payload: T;
 }
 
 // Reducer: handles state updates based on dispatched actions
-const productsReducer = (state = initialState, action: ActionWithPayload<any>) => {
+const productsReducer = (
+  state = initialState,
+  action: ActionWithPayload<any>
+) => {
   switch (action.type) {
     case GET_PRODUCTS:
       return {
@@ -57,15 +66,18 @@ const productsReducer = (state = initialState, action: ActionWithPayload<any>) =
         products: action.payload,
         filteredProducts: action.payload, // Initially, filtered products are the same as all products
       };
-      case FILTER_PRODUCTS:
-  return {
-    ...state,
-    filteredProducts: action.payload
-      ? state.products.filter((product) => product.category?.name.toLowerCase() === action.payload.toLowerCase())
-      : state.products, 
-  };
+    case FILTER_PRODUCTS:
+      return {
+        ...state,
+        filteredProducts: action.payload
+          ? state.products.filter(
+              (product) =>
+                product.category?.name.toLowerCase() ===
+                action.payload.toLowerCase()
+            )
+          : state.products,
+      };
 
-      
     case SET_PAGE:
       return {
         ...state,
@@ -73,12 +85,23 @@ const productsReducer = (state = initialState, action: ActionWithPayload<any>) =
       };
     default:
       return state; // Returns the existing state if action type is unknown
+
+    case SET_PRODUCTS_PER_PAGE:
+      return {
+        ...state,
+        productsPerPage: action.payload,
+      };
   }
 };
 
 // Selectors: functions to get specific data from Redux state
-export const selectProducts = (state: RootState) => state.productsSlice.products;
-export const selectFilteredProducts = (state: RootState) => state.productsSlice.filteredProducts;
-export const selectCurrentPage = (state: RootState) => state.productsSlice.currentPage;
+export const selectProducts = (state: RootState) =>
+  state.productsSlice.products;
+export const selectFilteredProducts = (state: RootState) =>
+  state.productsSlice.filteredProducts;
+export const selectCurrentPage = (state: RootState) =>
+  state.productsSlice.currentPage;
+export const selectProductsPerPage = (state: RootState) =>
+  state.productsSlice.productsPerPage;
 
 export default productsReducer;
