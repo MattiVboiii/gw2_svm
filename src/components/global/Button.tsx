@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./Button.module.css"; // Import CSS module for styling
+import styles from "../../styles/global/Button.module.css"; // Import CSS module for styling
 
 // Define the prop types for the Button component
 interface ButtonProps {

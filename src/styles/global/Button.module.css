@@ -1,0 +1,59 @@
+/* Base button styling */
+.button {
+  border: none;
+  border-radius: 5px;
+  padding: 10px 16px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Space between icon and text */
+  transition: all 0.3s ease-in-out;
+}
+
+/* Primary button style (default) */
+.primary {
+  background: var(--redAccent);
+  color: white;
+}
+
+.primary:hover {
+  background: var(--hoverButton);
+}
+
+/* Secondary button style */
+.secondary {
+  background: white;
+  color: var(--black);
+  border: 2px solid var(--black);
+}
+
+.secondary:hover {
+  background: var(--black);
+  color: white;
+}
+
+/* Button sizes */
+.small {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+}
+
+.medium {
+  padding: 10px 16px;
+  font-size: 1rem;
+}
+
+.large {
+  padding: 14px 20px;
+  font-size: 1.125rem;
+}
+
+/* Icon styling */
+.icon {
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+}
