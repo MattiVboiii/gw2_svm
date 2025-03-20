@@ -24,6 +24,13 @@ const Cart = () => {
     },
   ]);
 
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  };
+
   const handleRemove = (id: string) => {
     setCartProducts(cartProducts.filter((product) => product._id !== id));
   };
@@ -67,7 +74,11 @@ const Cart = () => {
                   <td>
                     <img src={product.images[0]} alt={product.name} />
                   </td>
-                  <td>{product.name}</td>
+                  <td>
+                    <a href={`/product/${generateSlug(product.name)}`}>
+                      {product.name}
+                    </a>
+                  </td>
                   <td>${product.price}</td>
                   <td>
                     <select
