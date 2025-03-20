@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { IoCartOutline } from "react-icons/io5";
-import { FaRegStar, FaStar, FaStarHalfAlt, FaRegEye } from "react-icons/fa";
+import { IoCartOutline, IoHeartOutline } from "react-icons/io5";
+import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { Link } from "react-router";
 import { Product } from "../types";
 import styles from "../styles/home/AllProducts.module.css";
@@ -9,28 +9,31 @@ import {
   getProducts,
   filterProducts,
   setPage,
+  setProductsPerPage,
   selectProducts,
   selectFilteredProducts,
   selectCurrentPage,
+  selectProductsPerPage,
 } from "../store/productsSlice";
 import api from "../api";
+import Button from "../components/global/Button";
 
 const AllProducts = () => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts) as Product[];
   const filteredProducts = useSelector(selectFilteredProducts) as Product[];
   const currentPage = useSelector(selectCurrentPage) as number;
-  const productsPerPage = 5;
+  const productsPerPage = useSelector(selectProductsPerPage) as number;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [categories, setCategories] = useState<
     { name: string; value: string }[]
   >([]);
 
-  const generateSlug = (name) => {
+  const generateSlug = (name: string) => {
     return name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
   };
 
   // Fetch products from the API when the component mounts
@@ -102,22 +105,37 @@ const AllProducts = () => {
                     : "All"
                 }`}
           </h1>
+          <div className={styles.products_per_page}>
+            <label htmlFor="products_per_page">Products per page:</label>
+            <input
+              type="number"
+              id="products_per_page"
+              value={productsPerPage}
+              min={5}
+              step={1}
+              max={filteredProducts.length}
+              onChange={(e) =>
+                dispatch(setProductsPerPage(parseInt(e.target.value)))
+              }
+            />
+          </div>
           {/* Category filter buttons */}
           <div className={styles.category_buttons}>
-            {categories.map((category) => (
+            {categories.map(({ name, value }) => (
               <button
-                key={category.value}
-                type="button"
+                key={value}
                 className={
-                  filteredProducts.length > 0 &&
-                  filteredProducts[0]?.category?.name.toLowerCase() ===
-                    category.value
+                  filteredProducts.length === products.length
+                    ? name === "All"
+                      ? styles.active_button
+                      : undefined
+                    : filteredProducts[0]?.category?.name === name
                     ? styles.active_button
                     : undefined
                 }
-                onClick={() => handleFilterChange(category.value)}
+                onClick={() => handleFilterChange(value)}
               >
-                {category.name}
+                {name}
               </button>
             ))}
           </div>
@@ -125,26 +143,32 @@ const AllProducts = () => {
           <section className={styles.product_container}>
             {currentProducts.map((product: Product) => (
               <section key={product._id} className={styles.product}>
-                <img src={product.images[0]} alt={product.name} />
-                <button type="button">
-                  <IoCartOutline className={styles.cart_icon} />
-                  Add to Cart
-                </button>
-                <h2>{product.name}</h2>
-                <p>${product.price}</p>
-                <p>
-                  {[...Array(5)].map((_, i) => {
-                    if (i < Math.floor(product.ratings)) {
-                      return <FaStar key={i} color="gold" />;
-                    } else if (i === Math.floor(product.ratings)) {
-                      return <FaStarHalfAlt key={i} color="gold" />;
-                    } else {
-                      return <FaRegStar key={i} color="grey" />;
-                    }
-                  })}
-                </p>
                 <Link to={`/product/${generateSlug(product.name)}`}>
-                  <FaRegEye className={styles.eye_icon} />
+                  <img src={product.images[0]} alt={product.name} />
+                  <button className={styles.wishlist_button}>
+                    <IoHeartOutline size={20} />
+                  </button>
+                  <h2>{product.name}</h2>
+                  <p>${product.price}</p>
+                  <p className={styles.ratings}>
+                    {[...Array(5)].map((_, i) => {
+                      if (i < Math.floor(product.ratings)) {
+                        return <FaStar key={i} color="gold" />;
+                      } else if (i === Math.floor(product.ratings)) {
+                        return <FaStarHalfAlt key={i} color="gold" />;
+                      } else {
+                        return <FaRegStar key={i} color="grey" />;
+                      }
+                    })}
+                  </p>
+                  <Button
+                    variant="primary"
+                    size="small"
+                    className={styles.cart_button}
+                  >
+                    <IoCartOutline size={20} />
+                    Add to Cart
+                  </Button>
                 </Link>
               </section>
             ))}
@@ -152,22 +176,24 @@ const AllProducts = () => {
           {/* Pagination controls */}
           <div className={styles.pagination}>
             {currentPage > 1 && (
-              <button
+              <Button
                 key="first"
-                className={styles.first_button}
+                variant="primary"
+                size="small"
                 onClick={() => paginate(1)}
               >
-                First
-              </button>
+                |&lt;&lt;
+              </Button>
             )}
             {currentPage > 1 && (
-              <button
+              <Button
                 key="prev"
-                className={styles.prev_button}
+                variant="primary"
+                size="small"
                 onClick={() => paginate(currentPage - 1)}
               >
-                Prev
-              </button>
+                &lt;
+              </Button>
             )}
             {Array.from({ length: 3 }, (_, i) => {
               const pageNumber = currentPage + i - 1;
@@ -177,8 +203,10 @@ const AllProducts = () => {
                   Math.ceil(filteredProducts.length / productsPerPage)
               ) {
                 return (
-                  <button
+                  <Button
                     key={pageNumber}
+                    variant="primary"
+                    size="small"
                     className={
                       currentPage === pageNumber
                         ? styles.active_button
@@ -187,32 +215,34 @@ const AllProducts = () => {
                     onClick={() => paginate(pageNumber)}
                   >
                     {pageNumber}
-                  </button>
+                  </Button>
                 );
               }
               return null;
             })}
             {currentPage <
               Math.ceil(filteredProducts.length / productsPerPage) && (
-              <button
+              <Button
                 key="next"
-                className={styles.next_button}
+                variant="primary"
+                size="small"
                 onClick={() => paginate(currentPage + 1)}
               >
-                Next
-              </button>
+                &gt;
+              </Button>
             )}
             {currentPage <
               Math.ceil(filteredProducts.length / productsPerPage) && (
-              <button
+              <Button
                 key="last"
-                className={styles.last_button}
+                variant="primary"
+                size="small"
                 onClick={() =>
                   paginate(Math.ceil(filteredProducts.length / productsPerPage))
                 }
               >
-                Last
-              </button>
+                &gt;&gt;|
+              </Button>
             )}
           </div>
         </>
