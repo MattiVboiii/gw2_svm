@@ -72,19 +72,17 @@ const BestSelling = () => {
         {displayedProducts.length > 0 ? (
           displayedProducts.map((product) => (
             <Link
-              key={product._id}
-              to={`/product/${product.slug}`} // Ensure slug exists
-              className={styles.product_card}
-              onClick={() => console.log("Navigating to product:", product.slug)} // Debugging navigation
-            >
+        key={product._id}
+        to={`/product/${product.slug}`} // Ensure slug exists
+        className={styles.product_card}
+      >
               {/* Wishlist Button */}
               <button
-                className={styles.wishlist_button}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent navigation when clicking the wishlist button
-                  console.log("Wishlist clicked for:", product.name);
-                }}
-              >
+          className={styles.wishlist_button}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent navigation when clicking the wishlist button
+          }}
+        >
                 <IoHeartOutline />
               </button>
 
