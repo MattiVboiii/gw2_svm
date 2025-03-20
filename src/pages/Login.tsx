@@ -1,5 +1,5 @@
 import styles from "../styles/home/Login.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import api from "../api";
 
@@ -8,6 +8,12 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/");
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,11 +24,19 @@ const Login = () => {
       setErrors(newErrors);
     } else {
       try {
-        const response = await api.post("/auth/login", { email, password });
-        localStorage.setItem("token", response.data.token);
+        const { data } = await api.post<{ token: string }>(
+          "/users/login",
+          { email, password },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        localStorage.setItem("token", data.token);
         navigate("/");
       } catch (error: any) {
-        setErrors([error.response.data.error]);
+        setErrors(["User not found"]);
       }
     }
   };

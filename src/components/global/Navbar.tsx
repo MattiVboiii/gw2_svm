@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { CiSearch, CiHeart, CiShoppingCart } from 'react-icons/ci';
-import { Link } from 'react-router';
-import styles from '/src/styles/global/Navbar.module.css';
+import { useState } from "react";
+import { CiSearch, CiHeart, CiShoppingCart } from "react-icons/ci";
+import { Link } from "react-router";
+import styles from "/src/styles/global/Navbar.module.css";
 
 const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
@@ -16,30 +16,32 @@ const Navbar = () => {
         <h1>Headless Clothing Store</h1>
         <ul>
           <li>
-            <Link to='/'>Home</Link>
+            <Link to="/">Home</Link>
           </li>
           <li>
-            <Link to='/contact'>Contact</Link>
+            <Link to="/contact">Contact</Link>
           </li>
           <li>
-            <Link to='/about'>About</Link>
+            <Link to="/about">About</Link>
           </li>
-          <li>
-            <Link to='/signup'>Sign Up</Link>
-          </li>
+          {!localStorage.getItem("token") && (
+            <li>
+              <Link to="/signup">Sign Up</Link>
+            </li>
+          )}
         </ul>
         {showSearch && (
-          <input type='text' placeholder='What are you looking for?' />
+          <input type="text" placeholder="What are you looking for?" />
         )}
         <ul className={`${styles.icons}`}>
           <li>
-            <CiSearch className='search-icon' onClick={handleSearchClick} />
+            <CiSearch className="search-icon" onClick={handleSearchClick} />
           </li>
           <li>
-            <CiHeart className='heart-icon' />
+            <CiHeart className="heart-icon" />
           </li>
           <li>
-            <CiShoppingCart className='cart-icon' />
+            <CiShoppingCart className="cart-icon" />
           </li>
         </ul>
       </nav>
