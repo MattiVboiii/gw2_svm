@@ -1,6 +1,6 @@
 import styles from "../styles/home/Login.module.css";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, redirect, useNavigate } from "react-router";
 import api from "../api";
 
 const Login = () => {
@@ -34,7 +34,10 @@ const Login = () => {
           }
         );
         localStorage.setItem("token", data.token);
-        navigate("/");
+        setErrors([
+          "Successfully logged in! You will be redirected in 3 seconds.",
+        ]);
+        setTimeout(() => window.location.reload(), 3000);
       } catch (error: any) {
         setErrors(["User not found"]);
       }
