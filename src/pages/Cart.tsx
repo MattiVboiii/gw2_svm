@@ -1,28 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "../types";
 import styles from "../styles/home/Cart.module.css";
 import { FaTrash } from "react-icons/fa";
 import Button from "../components/global/Button";
+import api from "../api";
+
+interface CartItem {
+  product: Product;
+  variantId: string;
+  quantity: number;
+  _id: string;
+}
 
 const Cart = () => {
-  const [cartProducts, setCartProducts] = useState<Product[]>([
-    {
-      _id: "1",
-      name: "LCD Monitor",
-      images: ["https://picsum.photos/200/300"],
-      price: 650,
-      quantity: 1,
-      inCart: true,
-    },
-    {
-      _id: "2",
-      name: "H1 Gamepad",
-      images: ["https://picsum.photos/200/301"],
-      price: 550,
-      quantity: 2,
-      inCart: true,
-    },
-  ]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      (async () => {
+        try {
+          const response = await api.get<{ items: CartItem[] }>("/cart", {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          setCartItems(response.data.items);
+        } catch (error: any) {
+          console.error("Error fetching cart:", error.message);
+        }
+      })();
+    }
+  }, []);
 
   const generateSlug = (name: string) => {
     return name
@@ -32,20 +40,20 @@ const Cart = () => {
   };
 
   const handleRemove = (id: string) => {
-    setCartProducts(cartProducts.filter((product) => product._id !== id));
+    setCartItems(cartItems.filter((item) => item._id !== id));
   };
 
   const handleQuantityChange = (id: string, newQuantity: number) => {
-    setCartProducts(
-      cartProducts.map((product) =>
-        product._id === id ? { ...product, quantity: newQuantity } : product
+    setCartItems(
+      cartItems.map((item) =>
+        item._id === id ? { ...item, quantity: newQuantity } : item
       )
     );
   };
 
   const calculateTotal = () => {
-    return cartProducts.reduce(
-      (total, product) => total + product.price * product.quantity,
+    return cartItems.reduce(
+      (total, item) => total + item.product.price * item.quantity,
       0
     );
   };
@@ -53,7 +61,7 @@ const Cart = () => {
   return (
     <div className={styles.container}>
       <h1>Shopping Cart</h1>
-      {cartProducts.length === 0 ? (
+      {cartItems.length === 0 ? (
         <p>Your cart is empty</p>
       ) : (
         <div className={styles.cart_content}>
@@ -69,26 +77,23 @@ const Cart = () => {
               </tr>
             </thead>
             <tbody>
-              {cartProducts.map((product) => (
-                <tr key={product._id}>
+              {cartItems.map((item) => (
+                <tr key={item._id}>
                   <td>
-                    <img src={product.images[0]} alt={product.name} />
+                    <img src={item.product.images[0]} alt={item.product.name} />
                   </td>
                   <td>
-                    <a href={`/product/${generateSlug(product.name)}`}>
-                      {product.name}
+                    <a href={`/product/${generateSlug(item.product.name)}`}>
+                      {item.product.name}
                     </a>
                   </td>
-                  <td>${product.price}</td>
+                  <td>${item.product.price}</td>
                   <td>
                     <select
                       className={styles.quantity_selector}
-                      value={product.quantity}
+                      value={item.quantity}
                       onChange={(e) =>
-                        handleQuantityChange(
-                          product._id,
-                          parseInt(e.target.value)
-                        )
+                        handleQuantityChange(item._id, parseInt(e.target.value))
                       }
                     >
                       {[...Array(10)].map((_, i) => (
@@ -98,11 +103,11 @@ const Cart = () => {
                       ))}
                     </select>
                   </td>
-                  <td>${product.price * product.quantity}</td>
+                  <td>${item.product.price * item.quantity}</td>
                   <td>
                     <FaTrash
                       className={styles.remove}
-                      onClick={() => handleRemove(product._id)}
+                      onClick={() => handleRemove(item._id)}
                     />
                   </td>
                 </tr>
@@ -111,14 +116,6 @@ const Cart = () => {
           </table>
 
           <div>
-            {/* <div className={styles.coupon_section}>
-              <input type="text" placeholder="Coupon Code" />
-              <Button variant="primary" size="small">
-                Apply Coupon
-              </Button>
-            </div> */}
-
-            {/* Cart Total Section */}
             <div className={styles.cart_total}>
               <h2>Cart Total</h2>
               <p>

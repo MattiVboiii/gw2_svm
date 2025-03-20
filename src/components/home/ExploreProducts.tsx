@@ -1,15 +1,22 @@
 import { useEffect, useState, useRef } from "react";
-import { IoHeartOutline, IoCartOutline, IoChevronBack, IoChevronForward } from "react-icons/io5"; // Icons for wishlist, cart, and navigation
+import {
+  IoHeartOutline,
+  IoCartOutline,
+  IoChevronBack,
+  IoChevronForward,
+} from "react-icons/io5"; // Icons for wishlist, cart, and navigation
 import { FaStar, FaRegStar } from "react-icons/fa"; // Icons for ratings
 import api from "../../api"; // Import global API client
 import styles from "../../styles/home/ExploreProducts.module.css"; // Import CSS module
 import { Product } from "../../types"; // Import product type
+import { Cart } from "../../types"; // Import cart type
 
 const ExploreProducts = () => {
   const [products, setProducts] = useState<Product[]>([]); // Store product list
   const [isLoading, setIsLoading] = useState(true); // Loading state
   const [showAll, setShowAll] = useState(false); // State to toggle full product list
   const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]); // Currently displayed products
+  const [cartProducts, setCartProducts] = useState<Cart[]>([]); // Cart products
   const containerRef = useRef<HTMLDivElement | null>(null); // Reference for horizontal scrolling
 
   // Fetch products from API when component mounts
@@ -56,6 +63,33 @@ const ExploreProducts = () => {
       containerRef.current.scrollBy({ left: 600, behavior: "smooth" }); // Adjust scroll distance
     }
   };
+
+  // Function to add a product to the cart
+  const handleAddToCart = async (product: Product) => {
+    if (localStorage.getItem("token")) {
+      try {
+        const response = await api.post<{ message: string }>(
+          "/cart",
+          {
+            productId: product._id,
+            variantId: product.variants[0]._id,
+            quantity: 1,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log(`${product.name} added to cart`);
+      } catch (error: any) {
+        console.error("Error adding product to cart:", error.message);
+      }
+    } else {
+      console.log("Please login to add product to cart");
+    }
+  };
+
   return (
     <section className={styles.explore_section}>
       {/* Section Header */}
@@ -77,7 +111,7 @@ const ExploreProducts = () => {
         )}
       </div>
       <h2 className={styles.section_title}>Explore Our Products</h2>
-  
+
       {isLoading ? (
         <p className={styles.loading_text}>Loading products...</p>
       ) : (
@@ -85,8 +119,10 @@ const ExploreProducts = () => {
           {/* Product List - Swaps between grid and scrollable view */}
           <div className={styles.scroll_wrapper}>
             <div
-              className={`${styles.product_container} ${showAll ? styles.all_products_active : ""}`}
-              ref={!showAll ? containerRef : null} 
+              className={`${styles.product_container} ${
+                showAll ? styles.all_products_active : ""
+              }`}
+              ref={!showAll ? containerRef : null}
             >
               {displayedProducts.length > 0 ? (
                 displayedProducts.map((product) => (
@@ -95,16 +131,20 @@ const ExploreProducts = () => {
                     <button className={styles.wishlist_button}>
                       <IoHeartOutline />
                     </button>
-  
+
                     {/* Product Image */}
-                    <img src={product.images[0]} alt={product.name} className={styles.product_image} />
-  
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className={styles.product_image}
+                    />
+
                     {/* Product Name */}
                     <h3 className={styles.product_name}>{product.name}</h3>
-  
+
                     {/* Price */}
                     <p className={styles.product_price}>${product.price}</p>
-  
+
                     {/* Rating */}
                     <div className={styles.product_rating}>
                       {[...Array(5)].map((_, i) =>
@@ -115,9 +155,12 @@ const ExploreProducts = () => {
                         )
                       )}
                     </div>
-  
+
                     {/* Add to Cart Button */}
-                    <button className={styles.add_to_cart}>
+                    <button
+                      className={styles.add_to_cart}
+                      onClick={() => handleAddToCart(product)}
+                    >
                       <IoCartOutline className={styles.cart_icon} />
                       <span>Add to Cart</span>
                     </button>
@@ -130,7 +173,7 @@ const ExploreProducts = () => {
           </div>
         </>
       )}
-  
+
       {/* View All Products Button */}
       <button
         className={styles.view_all_button}
@@ -144,5 +187,5 @@ const ExploreProducts = () => {
       </button>
     </section>
   );
-}  
+};
 export default ExploreProducts;
