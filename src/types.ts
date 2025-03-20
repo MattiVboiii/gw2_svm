@@ -8,6 +8,7 @@ export type ProductsState = {
 export interface Product {
   _id: string;
   name: string;
+  slug: string;
   description: string;
   category: Category;
   subcategory: Category;

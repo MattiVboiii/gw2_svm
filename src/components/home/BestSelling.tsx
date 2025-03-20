@@ -11,13 +11,33 @@ const BestSelling = () => {
   const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
   const [showAll, setShowAll] = useState(false);
 
+  // Function to generate slug if missing
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-") // Replace spaces with "-"
+      .replace(/[^a-z0-9-]/g, ""); // Remove special characters
+  };
+
   useEffect(() => {
     const fetchBestSelling = async () => {
       try {
         const response = await api.get<Product[]>("/products"); // Fetch products
         const shuffled = response.data.sort(() => 0.5 - Math.random());
-        setProducts(shuffled.slice(0, 8)); // Store 8 best-sellers
-        setDisplayedProducts(shuffled.slice(0, 4)); // Initially show only 4 products
+        const bestSelling = shuffled.slice(0, 8); // Store 8 best-sellers
+
+        // Ensure slug exists
+        bestSelling.forEach((p) => {
+          if (!p.slug) {
+            p.slug = generateSlug(p.name);
+          }
+        });
+
+        setProducts(bestSelling);
+        setDisplayedProducts(bestSelling.slice(0, 4)); // Initially show only 4 products
+
+        console.log("Fetched Best Selling Products:", bestSelling);
       } catch (error) {
         console.error("Error fetching best-selling products:", error);
       }
@@ -26,6 +46,7 @@ const BestSelling = () => {
     fetchBestSelling();
   }, []);
 
+  // Handle View All button
   const handleViewAll = () => {
     if (!showAll) {
       setDisplayedProducts(products); // Show all 8 products
@@ -52,13 +73,17 @@ const BestSelling = () => {
           displayedProducts.map((product) => (
             <Link
               key={product._id}
-              to={`/product/${product._id}`} // Link to product detail page
+              to={`/product/${product.slug}`} // Ensure slug exists
               className={styles.product_card}
+              onClick={() => console.log("Navigating to product:", product.slug)} // Debugging navigation
             >
               {/* Wishlist Button */}
               <button
                 className={styles.wishlist_button}
-                onClick={(e) => e.stopPropagation()} // Prevent navigation
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent navigation when clicking the wishlist button
+                  console.log("Wishlist clicked for:", product.name);
+                }}
               >
                 <IoHeartOutline />
               </button>
