@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { IoHeartOutline } from "react-icons/io5";
 import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { Product } from "../types";
@@ -29,7 +29,7 @@ const ProductDetail = () => {
         }
         if (selectedSize && selectedColour) {
           setErrors([]);
-          const response = await api.post<{ message: string }>(
+          await api.post<{ message: string }>(
             "/cart",
             {
               productId: product._id,
@@ -69,10 +69,8 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(
-          "https://webshop-api-wc6u.onrender.com/api/products"
-        );
-        const data = (await response.json()) as Product[];
+        const response = await api.get<Product[]>("/products");
+        const data = response.data;
 
         // Find the product by comparing generated slugs
         const matchedProduct = data.find((p) => generateSlug(p.name) === slug);

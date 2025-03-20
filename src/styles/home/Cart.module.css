@@ -63,8 +63,12 @@
       }
       .remove {
         color: var(--redAccent);
-        font-size: 1.8rem;
         cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        &:hover {
+          color: var(--hoverButton);
+          transform: scale(1.25) rotate(10deg);
+        }
       }
     }
     .quantity_selector {

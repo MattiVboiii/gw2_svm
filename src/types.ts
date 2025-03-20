@@ -38,16 +38,9 @@ export interface Variant {
   color: string;
 }
 
-export interface Cart {
+export interface CartItem {
+  product: Product;
+  variantId: string;
+  quantity: number;
   _id: string;
-  user: string;
-  items: {
-    product: Product;
-    variantId: string;
-    quantity: number;
-    _id: string;
-  }[];
-  total: number;
-  createdAt: string;
-  updatedAt: string;
 }

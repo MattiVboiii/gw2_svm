@@ -9,14 +9,13 @@ import { FaStar, FaRegStar } from "react-icons/fa"; // Icons for ratings
 import api from "../../api"; // Import global API client
 import styles from "../../styles/home/ExploreProducts.module.css"; // Import CSS module
 import { Product } from "../../types"; // Import product type
-import { Cart } from "../../types"; // Import cart type
+import { Link } from "react-router";
 
 const ExploreProducts = () => {
   const [products, setProducts] = useState<Product[]>([]); // Store product list
   const [isLoading, setIsLoading] = useState(true); // Loading state
   const [showAll, setShowAll] = useState(false); // State to toggle full product list
   const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]); // Currently displayed products
-  const [cartProducts, setCartProducts] = useState<Cart[]>([]); // Cart products
   const containerRef = useRef<HTMLDivElement | null>(null); // Reference for horizontal scrolling
 
   // Fetch products from API when component mounts
@@ -68,7 +67,7 @@ const ExploreProducts = () => {
   const handleAddToCart = async (product: Product) => {
     if (localStorage.getItem("token")) {
       try {
-        const response = await api.post<{ message: string }>(
+        await api.post<{ message: string }>(
           "/cart",
           {
             productId: product._id,
@@ -88,6 +87,13 @@ const ExploreProducts = () => {
     } else {
       console.log("Please login to add product to cart");
     }
+  };
+
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^a-z0-9-]/g, "");
   };
 
   return (
@@ -127,35 +133,36 @@ const ExploreProducts = () => {
               {displayedProducts.length > 0 ? (
                 displayedProducts.map((product) => (
                   <div key={product._id} className={styles.product_card}>
-                    {/* Wishlist Button */}
-                    <button className={styles.wishlist_button}>
-                      <IoHeartOutline />
-                    </button>
+                    <Link to={`/product/${generateSlug(product.name)}`}>
+                      {/* Wishlist Button */}
+                      <button className={styles.wishlist_button}>
+                        <IoHeartOutline />
+                      </button>
 
-                    {/* Product Image */}
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className={styles.product_image}
-                    />
+                      {/* Product Image */}
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className={styles.product_image}
+                      />
 
-                    {/* Product Name */}
-                    <h3 className={styles.product_name}>{product.name}</h3>
+                      {/* Product Name */}
+                      <h3 className={styles.product_name}>{product.name}</h3>
 
-                    {/* Price */}
-                    <p className={styles.product_price}>${product.price}</p>
+                      {/* Price */}
+                      <p className={styles.product_price}>${product.price}</p>
 
-                    {/* Rating */}
-                    <div className={styles.product_rating}>
-                      {[...Array(5)].map((_, i) =>
-                        i < Math.floor(product.ratings) ? (
-                          <FaStar key={i} color="gold" />
-                        ) : (
-                          <FaRegStar key={i} color="grey" />
-                        )
-                      )}
-                    </div>
-
+                      {/* Rating */}
+                      <div className={styles.product_rating}>
+                        {[...Array(5)].map((_, i) =>
+                          i < Math.floor(product.ratings) ? (
+                            <FaStar key={i} color="gold" />
+                          ) : (
+                            <FaRegStar key={i} color="grey" />
+                          )
+                        )}
+                      </div>
+                    </Link>
                     {/* Add to Cart Button */}
                     <button
                       className={styles.add_to_cart}

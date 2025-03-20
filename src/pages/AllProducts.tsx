@@ -33,7 +33,7 @@ const AllProducts = () => {
   const handleAddToCart = async (product: Product) => {
     if (localStorage.getItem("token")) {
       try {
-        const response = await api.post<{ message: string }>(
+        await api.post<{ message: string }>(
           "/cart",
           {
             productId: product._id,

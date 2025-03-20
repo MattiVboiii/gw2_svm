@@ -1,54 +1,73 @@
 import { useEffect, useState } from "react";
-import { Product } from "../types";
+import { CartItem } from "../types";
 import styles from "../styles/home/Cart.module.css";
 import { FaTrash } from "react-icons/fa";
 import Button from "../components/global/Button";
 import api from "../api";
 
-interface CartItem {
-  product: Product;
-  variantId: string;
-  quantity: number;
-  _id: string;
-}
-
 const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
       (async () => {
+        setIsLoading(true);
         try {
           const response = await api.get<{ items: CartItem[] }>("/cart", {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
-          setCartItems(response.data.items);
+          const items = response.data.items;
+          const combinedItems = items.reduce((map, item) => {
+            const existingItem = map.get(item.product._id);
+            if (existingItem) {
+              return map.set(item.product._id, {
+                ...item,
+                quantity: existingItem.quantity + item.quantity,
+              });
+            }
+            return map.set(item.product._id, item);
+          }, new Map());
+          setCartItems(Array.from(combinedItems.values()));
         } catch (error: any) {
           console.error("Error fetching cart:", error.message);
+        } finally {
+          setIsLoading(false);
         }
       })();
+    } else {
+      setIsLoading(false);
     }
   }, []);
 
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+  const handleRemove = async (productId: string) => {
+    try {
+      const items = cartItems.filter((item) => item.product._id !== productId);
+      setCartItems(items);
+      await api.delete(`/cart/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error removing item from cart:", error.message);
+    }
   };
 
-  const handleRemove = (id: string) => {
-    setCartItems(cartItems.filter((item) => item._id !== id));
-  };
-
-  const handleQuantityChange = (id: string, newQuantity: number) => {
-    setCartItems(
-      cartItems.map((item) =>
-        item._id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
+  const handleQuantityChange = (productId: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      handleRemove(productId);
+    } else {
+      setCartItems((prevItems) =>
+        prevItems.map((item) =>
+          item.product._id === productId
+            ? { ...item, quantity: newQuantity }
+            : item
+        )
+      );
+    }
   };
 
   const calculateTotal = () => {
@@ -61,7 +80,9 @@ const Cart = () => {
   return (
     <div className={styles.container}>
       <h1>Shopping Cart</h1>
-      {cartItems.length === 0 ? (
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : cartItems.length === 0 ? (
         <p>Your cart is empty</p>
       ) : (
         <div className={styles.cart_content}>
@@ -83,7 +104,11 @@ const Cart = () => {
                     <img src={item.product.images[0]} alt={item.product.name} />
                   </td>
                   <td>
-                    <a href={`/product/${generateSlug(item.product.name)}`}>
+                    <a
+                      href={`/product/${item.product.name
+                        .toLowerCase()
+                        .replace(/ /g, "-")}`}
+                    >
                       {item.product.name}
                     </a>
                   </td>
@@ -93,7 +118,10 @@ const Cart = () => {
                       className={styles.quantity_selector}
                       value={item.quantity}
                       onChange={(e) =>
-                        handleQuantityChange(item._id, parseInt(e.target.value))
+                        handleQuantityChange(
+                          item.product._id,
+                          parseInt(e.target.value)
+                        )
                       }
                     >
                       {[...Array(10)].map((_, i) => (
@@ -107,7 +135,8 @@ const Cart = () => {
                   <td>
                     <FaTrash
                       className={styles.remove}
-                      onClick={() => handleRemove(item._id)}
+                      size={20}
+                      onClick={() => handleRemove(item.product._id)}
                     />
                   </td>
                 </tr>
