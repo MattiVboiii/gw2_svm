@@ -1,3 +1,6 @@
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "/src/styles/global/toastOverride.module.css";
 import Footer from "./components/global/Footer";
 import Navbar from "./components/global/Navbar";
 import Homepage from "./pages/Homepage";
@@ -22,6 +25,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
       </Routes>
       <Footer />
+      <ToastContainer />
     </>
   );
 };

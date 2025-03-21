@@ -1,0 +1,20 @@
+/* Customize toast container */
+.Toastify__toast-container {
+  font-family: "Arial", sans-serif;
+}
+
+/* Customize toast style */
+.Toastify__toast {
+  background: #333;
+  color: #fff;
+}
+
+/* Customize success toast */
+.Toastify__toast--success {
+  background: var(--buttonGreen);
+}
+
+/* Customize error toast */
+.Toastify__toast--error {
+  background: var(--redAccent);
+}
