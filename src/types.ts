@@ -5,6 +5,11 @@ export type ProductsState = {
   productsPerPage: number;
 };
 
+export interface CartState {
+  products: Product[];
+  totalPrice: number;
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -32,4 +37,11 @@ export interface Variant {
   _id: string;
   size: string;
   color: string;
+}
+
+export interface CartItem {
+  product: Product;
+  variantId: string;
+  quantity: number;
+  _id: string;
 }

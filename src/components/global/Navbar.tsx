@@ -24,6 +24,9 @@ const Navbar = () => {
           <li>
             <Link to="/about">About</Link>
           </li>
+          <li>
+            <Link to="/signup">Sign Up</Link>
+          </li>
           {!localStorage.getItem("token") && (
             <li>
               <Link to="/signup">Sign Up</Link>
@@ -54,7 +57,9 @@ const Navbar = () => {
             <CiHeart className="heart-icon" />
           </li>
           <li>
-            <CiShoppingCart className="cart-icon" />
+            <Link to="/cart">
+              <CiShoppingCart className="cart-icon" />
+            </Link>
           </li>
         </ul>
       </nav>

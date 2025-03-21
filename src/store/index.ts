@@ -1,6 +1,6 @@
-import { createStore, combineReducers, applyMiddleware } from 'redux';
-import logger from 'redux-logger';
-import productsSlice from './productsSlice';
+import { createStore, combineReducers, applyMiddleware } from "redux";
+import logger from "redux-logger";
+import productsSlice from "./productsSlice";
 
 const rootReducer = combineReducers({
   productsSlice: productsSlice,

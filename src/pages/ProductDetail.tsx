@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { IoHeartOutline } from "react-icons/io5";
 import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { Product } from "../types";
 import styles from "../styles/home/ProductDetail.module.css";
 import { CiDeliveryTruck } from "react-icons/ci";
 import { GrPowerCycle } from "react-icons/gr";
+import api from "../api";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -14,6 +15,49 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColour, setSelectedColour] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
+
+  // Function to add a product to the cart
+  const handleAddToCart = async (product: Product) => {
+    if (localStorage.getItem("token")) {
+      try {
+        if (!selectedSize) {
+          setErrors(["Please select a size"]);
+        }
+        if (!selectedColour) {
+          setErrors(["Please select a colour"]);
+        }
+        if (selectedSize && selectedColour) {
+          setErrors([]);
+          await api.post<{ message: string }>(
+            "/cart",
+            {
+              productId: product._id,
+              variantId:
+                selectedSize && selectedColour
+                  ? product.variants.find(
+                      (variant) =>
+                        variant.size === selectedSize &&
+                        variant.color === selectedColour
+                    )?._id
+                  : product.variants[0]._id,
+              quantity: 1,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          console.log(`${product.name} added to cart`);
+        }
+      } catch (error: any) {
+        console.error("Error adding product to cart:", error.message);
+      }
+    } else {
+      console.log("Please login to add product to cart");
+    }
+  };
 
   const generateSlug = (name: string) => {
     return name
@@ -25,10 +69,8 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(
-          "https://webshop-api-wc6u.onrender.com/api/products"
-        );
-        const data = (await response.json()) as Product[];
+        const response = await api.get<Product[]>("/products");
+        const data = response.data;
 
         // Find the product by comparing generated slugs
         const matchedProduct = data.find((p) => generateSlug(p.name) === slug);
@@ -105,6 +147,13 @@ const ProductDetail = () => {
             )
           )}
         </div>
+        {errors.length > 0 && (
+          <ul className={styles.error}>
+            {errors.map((error, index) => (
+              <li key={index}>{error}</li>
+            ))}
+          </ul>
+        )}
         <div className={styles.options}>
           <div className={styles.quantity}>
             <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>
@@ -118,7 +167,12 @@ const ProductDetail = () => {
             />
             <button onClick={() => setQuantity(quantity + 1)}>+</button>
           </div>
-          <button className={styles.addto_button}>Buy Now</button>
+          <button
+            className={styles.addto_button}
+            onClick={() => handleAddToCart(product)}
+          >
+            Buy Now
+          </button>
           <button className={styles.addto_button}>
             <IoHeartOutline className={styles.icon} />
           </button>

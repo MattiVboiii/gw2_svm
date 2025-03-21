@@ -1,11 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom"; // Import Link for navigation
-import { IoHeartOutline, IoCartOutline, IoChevronBack, IoChevronForward } from "react-icons/io5"; // Icons
+import { IoHeartOutline, IoCartOutline, IoChevronBack, IoChevronForward } from "react-icons/io5"; // Icon
 import { FaStar, FaRegStar } from "react-icons/fa"; // Icons for ratings
 import api from "../../api"; // Import global API client
 import Button from "../global/Button"; // Import global Button component
 import styles from "../../styles/home/ExploreProducts.module.css"; // Import CSS module
 import { Product } from "../../types"; // Import product type
+import { Link } from "react-router";
 
 const ExploreProducts = () => {
   const [products, setProducts] = useState<Product[]>([]); // Store product list
@@ -60,6 +61,39 @@ const ExploreProducts = () => {
     }
   };
 
+  // Function to add a product to the cart
+  const handleAddToCart = async (product: Product) => {
+    if (localStorage.getItem("token")) {
+      try {
+        await api.post<{ message: string }>(
+          "/cart",
+          {
+            productId: product._id,
+            variantId: product.variants[0]._id,
+            quantity: 1,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log(`${product.name} added to cart`);
+      } catch (error: any) {
+        console.error("Error adding product to cart:", error.message);
+      }
+    } else {
+      console.log("Please login to add product to cart");
+    }
+  };
+
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+  };
+    
   return (
     <section className={styles.explore_section}>
       {/* Section Header */}
@@ -132,7 +166,9 @@ const ExploreProducts = () => {
                     {/* Add to Cart Button */}
                     <button
                       className={styles.add_to_cart}
-                      onClick={(e) => e.stopPropagation()} // Prevent navigation
+                      onClick={(e) => {
+                        handleAddToCart(product);
+                        e.stopPropagation();}} // Prevent navigation
                     >
                       <IoCartOutline className={styles.cart_icon} />
                       <span>Add to Cart</span>

@@ -29,6 +29,32 @@ const AllProducts = () => {
     { name: string; value: string }[]
   >([]);
 
+  // Function to add a product to the cart
+  const handleAddToCart = async (product: Product) => {
+    if (localStorage.getItem("token")) {
+      try {
+        await api.post<{ message: string }>(
+          "/cart",
+          {
+            productId: product._id,
+            variantId: product.variants[0]._id,
+            quantity: 1,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log(`${product.name} added to cart`);
+      } catch (error: any) {
+        console.error("Error adding product to cart:", error.message);
+      }
+    } else {
+      console.log("Please login to add product to cart");
+    }
+  };
+
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -161,15 +187,16 @@ const AllProducts = () => {
                       }
                     })}
                   </p>
-                  <Button
-                    variant="primary"
-                    size="small"
-                    className={styles.cart_button}
-                  >
-                    <IoCartOutline size={20} />
-                    Add to Cart
-                  </Button>
                 </Link>
+                <Button
+                  variant="primary"
+                  size="small"
+                  className={styles.cart_button}
+                  onClick={() => handleAddToCart(product)}
+                >
+                  <IoCartOutline size={20} />
+                  Add to Cart
+                </Button>
               </section>
             ))}
           </section>
