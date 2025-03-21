@@ -27,6 +27,24 @@ const Navbar = () => {
           <li>
             <Link to="/signup">Sign Up</Link>
           </li>
+          {!localStorage.getItem("token") && (
+            <li>
+              <Link to="/signup">Sign Up</Link>
+            </li>
+          )}
+          {localStorage.getItem("token") && (
+            <li>
+              <Link
+                to="/"
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  window.location.reload();
+                }}
+              >
+                Logout
+              </Link>
+            </li>
+          )}
         </ul>
         {showSearch && (
           <input type="text" placeholder="What are you looking for?" />

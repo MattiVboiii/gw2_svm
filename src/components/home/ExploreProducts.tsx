@@ -1,12 +1,9 @@
 import { useEffect, useState, useRef } from "react";
-import {
-  IoHeartOutline,
-  IoCartOutline,
-  IoChevronBack,
-  IoChevronForward,
-} from "react-icons/io5"; // Icons for wishlist, cart, and navigation
+import { Link } from "react-router-dom"; // Import Link for navigation
+import { IoHeartOutline, IoCartOutline, IoChevronBack, IoChevronForward } from "react-icons/io5"; // Icon
 import { FaStar, FaRegStar } from "react-icons/fa"; // Icons for ratings
 import api from "../../api"; // Import global API client
+import Button from "../global/Button"; // Import global Button component
 import styles from "../../styles/home/ExploreProducts.module.css"; // Import CSS module
 import { Product } from "../../types"; // Import product type
 import { Link } from "react-router";
@@ -14,17 +11,32 @@ import { Link } from "react-router";
 const ExploreProducts = () => {
   const [products, setProducts] = useState<Product[]>([]); // Store product list
   const [isLoading, setIsLoading] = useState(true); // Loading state
-  const [showAll, setShowAll] = useState(false); // State to toggle full product list
-  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]); // Currently displayed products
   const containerRef = useRef<HTMLDivElement | null>(null); // Reference for horizontal scrolling
+
+  // Function to generate slug if missing
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-") // Replace spaces with "-"
+      .replace(/[^a-z0-9-]/g, ""); // Remove special characters
+  };
 
   // Fetch products from API when component mounts
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await api.get<Product[]>("/products"); // Fetch products from API
-        setProducts(response.data);
-        setDisplayedProducts(response.data.slice(0, 8)); // Show first 8 initially
+        const shuffled = response.data.sort(() => 0.5 - Math.random()).slice(0, 8); // Select random 8 products
+
+        // Ensure each product has a slug
+        shuffled.forEach((p) => {
+          if (!p.slug) {
+            p.slug = generateSlug(p.name);
+          }
+        });
+
+        setProducts(shuffled);
       } catch (error) {
         console.error("Error fetching explore products:", error);
       } finally {
@@ -35,30 +47,16 @@ const ExploreProducts = () => {
     fetchProducts();
   }, []);
 
-  // Update displayed products when showAll changes
-  useEffect(() => {
-    if (showAll) {
-      setDisplayedProducts(products); // Show all products
-    } else {
-      setDisplayedProducts(products.slice(0, 8)); // Show only 8 products initially
-    }
-  }, [showAll, products]);
-
-  // Debugging: Log when showAll changes
-  useEffect(() => {
-    console.log("ShowAll changed:", showAll);
-  }, [showAll]);
-
   // Function to scroll the product container left
   const scrollLeft = () => {
-    if (containerRef.current && !showAll) {
+    if (containerRef.current) {
       containerRef.current.scrollBy({ left: -600, behavior: "smooth" }); // Adjust scroll distance
     }
   };
 
   // Function to scroll the product container right
   const scrollRight = () => {
-    if (containerRef.current && !showAll) {
+    if (containerRef.current) {
       containerRef.current.scrollBy({ left: 600, behavior: "smooth" }); // Adjust scroll distance
     }
   };
@@ -95,7 +93,7 @@ const ExploreProducts = () => {
       .replace(/ /g, "-")
       .replace(/[^a-z0-9-]/g, "");
   };
-
+    
   return (
     <section className={styles.explore_section}>
       {/* Section Header */}
@@ -104,8 +102,8 @@ const ExploreProducts = () => {
           <span className={styles.red_rectangle}></span>
           <p className={styles.section_text}>Our Products</p>
         </div>
-        {/* Hide arrows if all products are shown */}
-        {!showAll && (
+        {/* Hide arrows if not enough products to scroll */}
+        {products.length > 4 && (
           <div className={styles.arrow_container}>
             <button className={styles.arrow_left} onClick={scrollLeft}>
               <IoChevronBack />
@@ -122,56 +120,60 @@ const ExploreProducts = () => {
         <p className={styles.loading_text}>Loading products...</p>
       ) : (
         <>
-          {/* Product List - Swaps between grid and scrollable view */}
+          {/* Product List - Scrollable */}
           <div className={styles.scroll_wrapper}>
-            <div
-              className={`${styles.product_container} ${
-                showAll ? styles.all_products_active : ""
-              }`}
-              ref={!showAll ? containerRef : null}
-            >
-              {displayedProducts.length > 0 ? (
-                displayedProducts.map((product) => (
-                  <div key={product._id} className={styles.product_card}>
-                    <Link to={`/product/${generateSlug(product.name)}`}>
-                      {/* Wishlist Button */}
-                      <button className={styles.wishlist_button}>
-                        <IoHeartOutline />
-                      </button>
+            <div className={styles.product_container} ref={containerRef}>
+              {products.length > 0 ? (
+                products.map((product) => (
+                  <Link
+                    key={product._id}
+                    to={`/product/${product.slug}`} // Ensure slug exists
+                    className={styles.product_card}
+                  >
+                    {/* Wishlist Button */}
+                    <button
+                      className={styles.wishlist_button}
+                      onClick={(e) => e.stopPropagation()} // Prevent navigation
+                    >
+                      <IoHeartOutline />
+                    </button>
 
-                      {/* Product Image */}
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className={styles.product_image}
-                      />
+                    {/* Product Image */}
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className={styles.product_image}
+                    />
 
-                      {/* Product Name */}
-                      <h3 className={styles.product_name}>{product.name}</h3>
+                    {/* Product Name */}
+                    <h3 className={styles.product_name}>{product.name}</h3>
+                    <div className={styles.price_rating_container}>
+                    {/* Price */}
+                    <p className={styles.product_price}>${product.price}</p>
 
-                      {/* Price */}
-                      <p className={styles.product_price}>${product.price}</p>
+                    {/* Rating */}
+                    <div className={styles.product_rating}>
+                      {[...Array(5)].map((_, i) =>
+                        i < Math.floor(product.ratings) ? (
+                          <FaStar key={i} color="gold" />
+                        ) : (
+                          <FaRegStar key={i} color="grey" />
+                        )
+                      )}
+                    </div>
+                    </div>
 
-                      {/* Rating */}
-                      <div className={styles.product_rating}>
-                        {[...Array(5)].map((_, i) =>
-                          i < Math.floor(product.ratings) ? (
-                            <FaStar key={i} color="gold" />
-                          ) : (
-                            <FaRegStar key={i} color="grey" />
-                          )
-                        )}
-                      </div>
-                    </Link>
                     {/* Add to Cart Button */}
                     <button
                       className={styles.add_to_cart}
-                      onClick={() => handleAddToCart(product)}
+                      onClick={(e) => {
+                        handleAddToCart(product);
+                        e.stopPropagation();}} // Prevent navigation
                     >
                       <IoCartOutline className={styles.cart_icon} />
                       <span>Add to Cart</span>
                     </button>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <p>No products available</p>
@@ -181,18 +183,17 @@ const ExploreProducts = () => {
         </>
       )}
 
-      {/* View All Products Button */}
-      <button
+      {/* View All Products Button - Navigates to AllProducts page */}
+      <Button
+        variant="primary"
+        size="large"
         className={styles.view_all_button}
-        onClick={() => {
-          console.log("Before:", showAll);
-          setShowAll((prev) => !prev);
-          console.log("After:", showAll);
-        }}
+        onClick={() => (window.location.href = "/allproducts")}
       >
-        {showAll ? "Show Less" : "View All Products"}
-      </button>
+        View All Products
+      </Button>
     </section>
   );
 };
+
 export default ExploreProducts;
