@@ -5,7 +5,7 @@ import Button from "../global/Button"; // Import global Button component
 import styles from "../../styles/home/BestSelling.module.css"; // Import CSS module
 import { Product } from "../../types"; // Import product type
 import { IoHeartOutline } from "react-icons/io5"; // Icon for wishlist
-
+import { FaStar, FaRegStar } from "react-icons/fa"; // Icons for ratings
 const BestSelling = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
@@ -63,8 +63,20 @@ const BestSelling = () => {
         <div className={styles.section_header}>
           <span className={styles.red_rectangle}></span>
           <p className={styles.section_text}>This Month</p>
-        </div>
+          </div>
+        <div className={styles.section_title_container}>
         <h2 className={styles.section_title}>Best Selling Products</h2>
+       
+         {/* View All Button */}
+      <Button
+        variant="primary"
+        size="large"
+        className={styles.view_all_button}
+        onClick={handleViewAll}
+      >
+        {showAll ? "Show Less" : "View All"}
+      </Button>
+      </div>
       </div>
 
       {/* Product List */}
@@ -94,22 +106,21 @@ const BestSelling = () => {
 
               {/* Price */}
               <p className={styles.product_price}>${product.price}</p>
+              <div className={styles.product_rating}>
+                      {[...Array(5)].map((_, i) =>
+                        i < Math.floor(product.ratings) ? (
+                          <FaStar key={i} color="gold" />
+                        ) : (
+                          <FaRegStar key={i} color="grey" />
+                        )
+                      )}
+                    </div>
             </Link>
           ))
         ) : (
           <p>Loading products...</p>
         )}
       </div>
-
-      {/* View All Button */}
-      <Button
-        variant="primary"
-        size="large"
-        className={styles.view_all_button}
-        onClick={handleViewAll}
-      >
-        {showAll ? "Show Less" : "View All"}
-      </Button>
     </section>
   );
 };
