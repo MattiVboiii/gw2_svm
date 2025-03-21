@@ -1,12 +1,16 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom"; // Import Link for navigation
-import { IoHeartOutline, IoCartOutline, IoChevronBack, IoChevronForward } from "react-icons/io5"; // Icon
+import {
+  IoHeartOutline,
+  IoCartOutline,
+  IoChevronBack,
+  IoChevronForward,
+} from "react-icons/io5"; // Icon
 import { FaStar, FaRegStar } from "react-icons/fa"; // Icons for ratings
 import api from "../../api"; // Import global API client
 import Button from "../global/Button"; // Import global Button component
 import styles from "../../styles/home/ExploreProducts.module.css"; // Import CSS module
 import { Product } from "../../types"; // Import product type
-import { Link } from "react-router";
 
 const ExploreProducts = () => {
   const [products, setProducts] = useState<Product[]>([]); // Store product list
@@ -27,7 +31,9 @@ const ExploreProducts = () => {
     const fetchProducts = async () => {
       try {
         const response = await api.get<Product[]>("/products"); // Fetch products from API
-        const shuffled = response.data.sort(() => 0.5 - Math.random()).slice(0, 8); // Select random 8 products
+        const shuffled = response.data
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 8); // Select random 8 products
 
         // Ensure each product has a slug
         shuffled.forEach((p) => {
@@ -87,13 +93,6 @@ const ExploreProducts = () => {
     }
   };
 
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^a-z0-9-]/g, "");
-  };
-    
   return (
     <section className={styles.explore_section}>
       {/* Section Header */}
@@ -148,19 +147,19 @@ const ExploreProducts = () => {
                     {/* Product Name */}
                     <h3 className={styles.product_name}>{product.name}</h3>
                     <div className={styles.price_rating_container}>
-                    {/* Price */}
-                    <p className={styles.product_price}>${product.price}</p>
+                      {/* Price */}
+                      <p className={styles.product_price}>${product.price}</p>
 
-                    {/* Rating */}
-                    <div className={styles.product_rating}>
-                      {[...Array(5)].map((_, i) =>
-                        i < Math.floor(product.ratings) ? (
-                          <FaStar key={i} color="gold" />
-                        ) : (
-                          <FaRegStar key={i} color="grey" />
-                        )
-                      )}
-                    </div>
+                      {/* Rating */}
+                      <div className={styles.product_rating}>
+                        {[...Array(5)].map((_, i) =>
+                          i < Math.floor(product.ratings) ? (
+                            <FaStar key={i} color="gold" />
+                          ) : (
+                            <FaRegStar key={i} color="grey" />
+                          )
+                        )}
+                      </div>
                     </div>
 
                     {/* Add to Cart Button */}
@@ -168,7 +167,8 @@ const ExploreProducts = () => {
                       className={styles.add_to_cart}
                       onClick={(e) => {
                         handleAddToCart(product);
-                        e.stopPropagation();}} // Prevent navigation
+                        e.stopPropagation();
+                      }} // Prevent navigation
                     >
                       <IoCartOutline className={styles.cart_icon} />
                       <span>Add to Cart</span>
