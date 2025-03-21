@@ -14,7 +14,7 @@
 }
 .section_title_container {
   display: flex;
-  justify-content: space-between; /* Размещает заголовок слева, кнопку справа */
+  justify-content: space-between;
   align-items: center;
   width: 100%;
   margin-bottom: 2vh;
@@ -155,13 +155,13 @@
   color: white;
   padding: 1.5rem 2rem;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  white-space: nowrap; /* Предотвращает перенос кнопки */
-  margin-left: auto; /* Двигает кнопку вправо, к границе последней карточки */
+  white-space: nowrap;
+  margin-left: auto;
 }
 
 .view_all_button:hover {
