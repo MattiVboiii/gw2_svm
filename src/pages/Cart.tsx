@@ -1,75 +1,158 @@
 import { useEffect, useState } from "react";
-import { CartItem } from "../types";
+import { CartItem } from "../types"; // CartItem should include properties like variantId, selectedSize, and selectedColour
 import styles from "../styles/home/Cart.module.css";
 import { FaTrash } from "react-icons/fa";
 import Button from "../components/global/Button";
+import { updateCartQuantity } from "../utils/updateCartQuantity";
 import api from "../api";
 
+// Key used to store/read the guest cart from localStorage
+const GUEST_CART_KEY = "guestCart";
+
 const Cart = () => {
+  // State for the cart items and the loading indicator
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // Retrieve the authentication token from localStorage (if available)
+  const token = localStorage.getItem("token");
 
+  // Helper function to retrieve guest cart items from localStorage
+  const getGuestCart = (): CartItem[] => {
+    const data = localStorage.getItem(GUEST_CART_KEY);
+    return data ? JSON.parse(data) : [];
+  };
+
+  // Helper function to update guest cart items in localStorage
+  const setGuestCart = (items: CartItem[]) => {
+    localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
+  };
+
+  // Function to sync guest cart items with the server when a user logs in
+  const syncGuestCart = async (guestItems: CartItem[]) => {
+    for (const item of guestItems) {
+      try {
+        // Post each guest cart item to the server
+        await api.post<{ message: string }>(
+          "/cart",
+          {
+            productId: item.product._id,
+            variantId: item.variantId,
+            quantity: item.quantity,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      } catch (error: any) {
+        console.error("Error syncing guest cart:", error.message);
+      }
+    }
+    // Remove guest cart from localStorage after syncing
+    localStorage.removeItem(GUEST_CART_KEY);
+  };
+
+  // Load the cart items when the component mounts or when the token changes
   useEffect(() => {
-    if (localStorage.getItem("token")) {
-      (async () => {
-        setIsLoading(true);
+    const loadCart = async () => {
+      if (token) {
+        // Retrieve guest cart items from localStorage
+        const guestItems = getGuestCart();
+
+        // If there are guest cart items, synchronize them with the server
+        if (guestItems.length > 0) {
+          await syncGuestCart(guestItems);
+        }
+
         try {
+          // Fetch the updated cart items from the server using the auth token
           const response = await api.get<{ items: CartItem[] }>("/cart", {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           });
+
           const items = response.data.items;
+
+          // Combine items with the same product and variant by summing their quantities
           const combinedItems = items.reduce((map, item) => {
-            const existingItem = map.get(item.product._id);
+            const key = item.product._id + "-" + item.variantId;
+            const existingItem = map.get(key);
+
             if (existingItem) {
-              return map.set(item.product._id, {
+              // If an item with the same key exists, sum their quantities
+              return map.set(key, {
                 ...item,
                 quantity: existingItem.quantity + item.quantity,
               });
             }
-            return map.set(item.product._id, item);
+
+            // Otherwise, set the new item for this key
+            return map.set(key, item);
           }, new Map());
+
+          // Update the cartItems state with the combined items
           setCartItems(Array.from(combinedItems.values()));
         } catch (error: any) {
           console.error("Error fetching cart:", error.message);
         } finally {
+          // End the loading state regardless of success or error
           setIsLoading(false);
         }
-      })();
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
+      } else {
+        // For guest users: load cart items from localStorage
+        const guestCart = getGuestCart();
+        setCartItems(guestCart);
+        setIsLoading(false);
+      }
+    };
+    // Execute the loadCart function
+    loadCart();
+  }, [token]);
 
-  const handleRemove = async (productId: string) => {
-    try {
-      const items = cartItems.filter((item) => item.product._id !== productId);
-      setCartItems(items);
-      await api.delete(`/cart/${productId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-    } catch (error: any) {
-      console.error("Error removing item from cart:", error.message);
-    }
-  };
-
-  const handleQuantityChange = (productId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      handleRemove(productId);
+  // Function to handle removal of an item from the cart
+  const handleRemove = async (productId: string, variantId: string) => {
+    if (token) {
+      try {
+        // Delete the item from the server cart using the provided product and variant IDs
+        await api.delete(`/cart/${productId}/${variantId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        // Filter out the removed item from the local state
+        const updated = cartItems.filter(
+          (item) =>
+            !(item.product._id === productId && item.variantId === variantId)
+        );
+        setCartItems(updated);
+      } catch (error: any) {
+        console.error("Error removing item from cart:", error.message);
+      }
     } else {
-      setCartItems((prevItems) =>
-        prevItems.map((item) =>
-          item.product._id === productId
-            ? { ...item, quantity: newQuantity }
-            : item
-        )
+      // For guest users, remove the item locally and update localStorage
+      const updated = cartItems.filter(
+        (item) =>
+          !(item.product._id === productId && item.variantId === variantId)
       );
+      setCartItems(updated);
+      setGuestCart(updated);
     }
   };
 
+  // Function to handle quantity changes by calling the updateCartQuantity utility function
+  const handleQuantityChange = (
+    productId: string,
+    variantId: string,
+    quantity: number
+  ) => {
+    updateCartQuantity(
+      token,
+      cartItems,
+      setCartItems,
+      setGuestCart,
+      productId,
+      variantId,
+      quantity
+    );
+  };
+
+  // Function to calculate the total price of all items in the cart
   const calculateTotal = () => {
     return cartItems.reduce(
       (total, item) => total + item.product.price * item.quantity,
@@ -81,8 +164,10 @@ const Cart = () => {
     <div className={styles.container}>
       <h1>Shopping Cart</h1>
       {isLoading ? (
+        // Show loading message while the cart is being loaded
         <p>Loading...</p>
       ) : cartItems.length === 0 ? (
+        // Inform the user if the cart is empty
         <p>Your cart is empty</p>
       ) : (
         <div className={styles.cart_content}>
@@ -91,6 +176,7 @@ const Cart = () => {
               <tr>
                 <th></th>
                 <th>Product</th>
+                <th>Variant</th>
                 <th>Price</th>
                 <th>Quantity</th>
                 <th>Subtotal</th>
@@ -101,9 +187,11 @@ const Cart = () => {
               {cartItems.map((item) => (
                 <tr key={item._id}>
                   <td>
+                    {/* Display product thumbnail */}
                     <img src={item.product.images[0]} alt={item.product.name} />
                   </td>
                   <td>
+                    {/* Link to the product detail page */}
                     <a
                       href={`/product/${item.product.name
                         .toLowerCase()
@@ -112,14 +200,22 @@ const Cart = () => {
                       {item.product.name}
                     </a>
                   </td>
+                  <td>
+                    {/* Show variant details if available */}
+                    {item.selectedSize && item.selectedColour
+                      ? `${item.selectedSize} / ${item.selectedColour}`
+                      : "Default"}
+                  </td>
                   <td>${item.product.price}</td>
                   <td>
+                    {/* Quantity selector; triggers handleQuantityChange on change */}
                     <select
                       className={styles.quantity_selector}
                       value={item.quantity}
                       onChange={(e) =>
                         handleQuantityChange(
                           item.product._id,
+                          item.variantId,
                           parseInt(e.target.value)
                         )
                       }
@@ -133,17 +229,19 @@ const Cart = () => {
                   </td>
                   <td>${item.product.price * item.quantity}</td>
                   <td>
+                    {/* Remove button to delete the item from the cart */}
                     <FaTrash
                       className={styles.remove}
                       size={20}
-                      onClick={() => handleRemove(item.product._id)}
+                      onClick={() =>
+                        handleRemove(item.product._id, item.variantId)
+                      }
                     />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-
           <div>
             <div className={styles.cart_total}>
               <h2>Cart Total</h2>
@@ -156,6 +254,7 @@ const Cart = () => {
               <p>
                 <strong>Total:</strong> <span>${calculateTotal()}</span>
               </p>
+              {/* Button to proceed to checkout */}
               <Button
                 variant="primary"
                 size="large"

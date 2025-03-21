@@ -7,6 +7,7 @@ import styles from "../styles/home/ProductDetail.module.css";
 import { CiDeliveryTruck } from "react-icons/ci";
 import { GrPowerCycle } from "react-icons/gr";
 import api from "../api";
+import { toast } from "react-toastify";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -19,43 +20,75 @@ const ProductDetail = () => {
 
   // Function to add a product to the cart
   const handleAddToCart = async (product: Product) => {
+    // Find the matching variant or fallback to first variant (if any)
+    const variant =
+      product.variants.find(
+        (variant) =>
+          variant.size === selectedSize && variant.color === selectedColour
+      ) || product.variants[0];
+
     if (localStorage.getItem("token")) {
       try {
         if (!selectedSize) {
-          setErrors(["Please select a size"]);
+          toast.error("Please select a size");
+          return;
         }
         if (!selectedColour) {
-          setErrors(["Please select a colour"]);
+          toast.error("Please select a colour");
+          return;
         }
-        if (selectedSize && selectedColour) {
-          setErrors([]);
-          await api.post<{ message: string }>(
-            "/cart",
-            {
-              productId: product._id,
-              variantId:
-                selectedSize && selectedColour
-                  ? product.variants.find(
-                      (variant) =>
-                        variant.size === selectedSize &&
-                        variant.color === selectedColour
-                    )?._id
-                  : product.variants[0]._id,
-              quantity: 1,
+        await api.post<{ message: string }>(
+          "/cart",
+          {
+            productId: product._id,
+            variantId: variant._id,
+            quantity: quantity, // use number from selected quantity
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-          console.log(`${product.name} added to cart`);
-        }
+          }
+        );
+        toast.success(`${product.name} added to cart`);
       } catch (error: any) {
-        console.error("Error adding product to cart:", error.message);
+        toast.error("Error adding product to cart: " + error.message);
       }
     } else {
-      console.log("Please login to add product to cart");
+      // Guest cart: Save selected product info to localStorage
+      if (!selectedSize) {
+        toast.error("Please select a size");
+        return;
+      }
+      if (!selectedColour) {
+        toast.error("Please select a colour");
+        return;
+      }
+      const guestCartStr = localStorage.getItem("guestCart");
+      const guestCart = guestCartStr ? JSON.parse(guestCartStr) : [];
+
+      // Create a new cart item with selected variant information.
+      // Note: _id is generated here as a combination of product and variant IDs to keep it unique.
+      const newItem = {
+        _id: product._id + "-" + variant._id,
+        product,
+        variantId: variant._id,
+        quantity,
+        selectedSize,
+        selectedColour,
+      };
+
+      // If same variant already exists, add to its quantity.
+      const existingIndex = guestCart.findIndex(
+        (item: any) => item.variantId === variant._id
+      );
+      if (existingIndex >= 0) {
+        guestCart[existingIndex].quantity += quantity;
+      } else {
+        guestCart.push(newItem);
+      }
+      localStorage.setItem("guestCart", JSON.stringify(guestCart));
+      toast.success(`${product.name} added to guest cart`);
     }
   };
 
