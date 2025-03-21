@@ -6,6 +6,7 @@ import styles from "../../styles/home/BestSelling.module.css"; // Import CSS mod
 import { Product } from "../../types"; // Import product type
 import { IoHeartOutline } from "react-icons/io5"; // Icon for wishlist
 import { FaStar, FaRegStar } from "react-icons/fa"; // Icons for ratings
+
 const BestSelling = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
@@ -18,6 +19,11 @@ const BestSelling = () => {
       .trim()
       .replace(/\s+/g, "-") // Replace spaces with "-"
       .replace(/[^a-z0-9-]/g, ""); // Remove special characters
+  };
+
+  // Function to generate old price (if not provided by API)
+  const getOldPrice = (price: number) => {
+    return Math.round(price * 1.2); // Add 20% to current price
   };
 
   useEffect(() => {
@@ -63,20 +69,20 @@ const BestSelling = () => {
         <div className={styles.section_header}>
           <span className={styles.red_rectangle}></span>
           <p className={styles.section_text}>This Month</p>
-          </div>
+        </div>
         <div className={styles.section_title_container}>
-        <h2 className={styles.section_title}>Best Selling Products</h2>
-       
-         {/* View All Button */}
-      <Button
-        variant="primary"
-        size="large"
-        className={styles.view_all_button}
-        onClick={handleViewAll}
-      >
-        {showAll ? "Show Less" : "View All"}
-      </Button>
-      </div>
+          <h2 className={styles.section_title}>Best Selling Products</h2>
+
+          {/* View All Button */}
+          <Button
+            variant="primary"
+            size="large"
+            className={styles.view_all_button}
+            onClick={handleViewAll}
+          >
+            {showAll ? "Show Less" : "View All"}
+          </Button>
+        </div>
       </div>
 
       {/* Product List */}
@@ -84,37 +90,46 @@ const BestSelling = () => {
         {displayedProducts.length > 0 ? (
           displayedProducts.map((product) => (
             <Link
-        key={product._id}
-        to={`/product/${product.slug}`} // Ensure slug exists
-        className={styles.product_card}
-      >
+              key={product._id}
+              to={`/product/${product.slug}`} // Ensure slug exists
+              className={styles.product_card}
+            >
               {/* Wishlist Button */}
               <button
-          className={styles.wishlist_button}
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent navigation when clicking the wishlist button
-          }}
-        >
+                className={styles.wishlist_button}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent navigation when clicking the wishlist button
+                }}
+              >
                 <IoHeartOutline />
               </button>
 
               {/* Product Image */}
-              <img src={product.images[0]} alt={product.name} className={styles.product_image} />
+              <img
+                src={product.images[0]}
+                alt={product.name}
+                className={styles.product_image}
+              />
 
               {/* Product Name */}
               <h3 className={styles.product_name}>{product.name}</h3>
 
-              {/* Price */}
-              <p className={styles.product_price}>${product.price}</p>
+              {/* Price with old price */}
+              <p className={styles.product_price}>
+                ${product.price}
+                <span className={styles.old_price}>${getOldPrice(product.price)}</span>
+              </p>
+
+              {/* Rating */}
               <div className={styles.product_rating}>
-                      {[...Array(5)].map((_, i) =>
-                        i < Math.floor(product.ratings) ? (
-                          <FaStar key={i} color="gold" />
-                        ) : (
-                          <FaRegStar key={i} color="grey" />
-                        )
-                      )}
-                    </div>
+                {[...Array(5)].map((_, i) =>
+                  i < Math.floor(product.ratings) ? (
+                    <FaStar key={i} color="gold" />
+                  ) : (
+                    <FaRegStar key={i} color="grey" />
+                  )
+                )}
+              </div>
             </Link>
           ))
         ) : (

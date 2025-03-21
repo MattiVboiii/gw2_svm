@@ -126,6 +126,13 @@
   align-items: center;
   margin-top: 1rem;
 }
+.old_price {
+  font-size: 1.8rem;
+  font-weight: normal;
+  text-decoration: line-through;
+  color: var(--grey);
+  margin-left: 1rem;
+}
 
 .product_rating {
   display: flex;
