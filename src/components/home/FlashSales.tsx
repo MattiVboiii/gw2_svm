@@ -56,19 +56,27 @@ const FlashSales = () => {
     <IoChevronForward />
   </button>
 </div>
-
-
       {/* Product list */}
       <div className={styles.product_container } ref={scrollRef}>
         {products.map((product) => (
           <Link to={`/product/${product.slug}`} key={product._id} className={styles.product_card}>
+                        {/* Fake discount badge */}
+<span className={styles.discount_badge}>-35%</span>
             <button className={styles.wishlist_button} onClick={(e) => e.stopPropagation()}>
               <IoHeartOutline />
             </button>
             <img src={product.images[0]} alt={product.name} className={styles.product_image} />
             <h3 className={styles.product_name}>{product.name}</h3>
             <p className={styles.product_price}>${product.price}</p>
-            <div className={styles.product_rating}>
+
+
+{/* Prices */}
+<div className={styles.price_rating_container}>
+  <div className={styles.price_block}>
+    <span className={styles.product_price}>${product.price}</span>
+    <span className={styles.old_price}>${(product.price / 0.65).toFixed(0)}</span>
+  </div>
+  <div className={styles.product_rating}>
               {[...Array(5)].map((_, i) =>
                 i < Math.floor(product.ratings) ? (
                   <FaStar key={i} color="gold" />
@@ -77,6 +85,8 @@ const FlashSales = () => {
                 )
               )}
             </div>
+</div>
+        
           </Link>
         ))}
       </div>
