@@ -4,10 +4,21 @@ import FlashSalesTimer from "./FlashSalesTimer";
 import { Product } from "../../types";
 import api from "../../api";
 import { Link } from "react-router-dom";
-import { IoHeartOutline } from "react-icons/io5";
+import { IoHeartOutline, IoChevronBack, IoChevronForward } from "react-icons/io5";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import Button from "../global/Button"; 
+import { useRef } from "react";
 
+// Function to scroll the product list
+const scrollRef = useRef<HTMLDivElement>(null);
+const scrollLeft = () => {
+    scrollRef.current?.scrollBy({ left: -600, behavior: "smooth" });
+  };
+  
+  const scrollRight = () => {
+    scrollRef.current?.scrollBy({ left: 600, behavior: "smooth" });
+  };
+  
 const FlashSales = () => {
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -35,9 +46,20 @@ const FlashSales = () => {
         </div>
         <FlashSalesTimer date="2025-03-25T23:59:59" />
       </div>
+          
+        {/* Arrow buttons */}
+      <div className={styles.arrow_container}>
+  <button className={styles.arrow_left} onClick={scrollLeft}>
+    <IoChevronBack />
+  </button>
+  <button className={styles.arrow_right} onClick={scrollRight}>
+    <IoChevronForward />
+  </button>
+</div>
+
 
       {/* Product list */}
-      <div className={styles.product_container}>
+      <div className={styles.product_container } ref={scrollRef}>
         {products.map((product) => (
           <Link to={`/product/${product.slug}`} key={product._id} className={styles.product_card}>
             <button className={styles.wishlist_button} onClick={(e) => e.stopPropagation()}>
