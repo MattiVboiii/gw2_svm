@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CountdownProps, TimeLeft } from "../../types";
-
+import styles from "../../styles/home/FlashSalesTimer.module.css";
 const FlashSalesTimer: React.FC<CountdownProps> = ({ date }) => {
   // Function to calculate remaining time from now to the target date
   const calculateTimeLeft = (): TimeLeft => {
@@ -29,18 +29,30 @@ const FlashSalesTimer: React.FC<CountdownProps> = ({ date }) => {
 
   // Format numbers like 01, 02, 03 etc.
   const format = (num: number) => String(num).padStart(2, "0");
-
   return (
-    <div>
-      <h2>Flash Sales Countdown</h2>
-      <div>
-        <span>{format(timeLeft.days)} Days </span>
-        <span>{format(timeLeft.hours)} Hours </span>
-        <span>{format(timeLeft.minutes)} Min </span>
-        <span>{format(timeLeft.seconds)} Sec</span>
+    <div className={styles.timer_wrapper}>
+      <div className={styles.time_box}>
+        <h4>Days</h4>
+        <h1>{format(timeLeft.days)}</h1>
+      </div>
+      <span className={styles.separator}>:</span>
+      <div className={styles.time_box}>
+        <h4>Hours</h4>
+        <h1>{format(timeLeft.hours)}</h1>
+      </div>
+      <span className={styles.separator}>:</span>
+      <div className={styles.time_box}>
+        <h4>Minutes</h4>
+        <h1>{format(timeLeft.minutes)}</h1>
+      </div>
+      <span className={styles.separator}>:</span>
+      <div className={styles.time_box}>
+        <h4>Seconds</h4>
+        <h1>{format(timeLeft.seconds)}</h1>
       </div>
     </div>
   );
+  
 };
 
 export default FlashSalesTimer;
