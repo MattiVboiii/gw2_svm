@@ -254,6 +254,12 @@ const Cart = () => {
               <p>
                 <strong>Total:</strong> <span>${calculateTotal()}</span>
               </p>
+              {/* <p>
+                <strong>Items:</strong>{" "}
+                <span>
+                  {cartItems.reduce((total, item) => total + item.quantity, 0)}
+                </span>
+              </p> */}
               {/* Button to proceed to checkout */}
               <Button
                 variant="primary"

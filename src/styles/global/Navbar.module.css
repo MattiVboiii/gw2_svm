@@ -49,7 +49,7 @@ nav {
     cursor: pointer;
     border-radius: 0.5rem;
     position: relative;
-    left: 20rem;
+    left: 15rem;
     font-size: 1.5rem;
     &:focus {
       outline: none;
@@ -57,12 +57,31 @@ nav {
     }
   }
   .icons {
-    font-size: 1.5rem;
     li {
       cursor: pointer;
       transition: all 0.2s ease-in-out;
+      display: flex;
+      align-items: center;
       &:hover {
         color: var(--redAccent);
+      }
+      .wishlist_badge {
+        background-color: var(--redAccent);
+        color: white;
+        padding: 0.25vh 0.5vw;
+        border-radius: 100px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-left: 0.25rem;
+      }
+      .cart_badge {
+        background-color: var(--redAccent);
+        color: white;
+        padding: 0.25vh 0.5vw;
+        border-radius: 100px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-left: 0.25rem;
       }
     }
   }
