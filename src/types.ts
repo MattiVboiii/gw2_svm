@@ -45,3 +45,10 @@ export interface CartItem {
   quantity: number;
   _id: string;
 }
+
+export interface WishlistItem {
+  _id: string; // Assuming this is the product ID from the API response
+  name: string;
+  images: string[];
+  price: number;
+}
