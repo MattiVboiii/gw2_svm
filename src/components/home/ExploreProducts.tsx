@@ -126,13 +126,16 @@ const ExploreProducts = () => {
                 products.map((product) => (
                   <Link
                     key={product._id}
-                    to={`/product/${product.slug}`} // Ensure slug exists
+                    // Updated link to include the unique product ID
+                    to={`/product/${
+                      product.slug || generateSlug(product.name)
+                    }-${product._id}`}
                     className={styles.product_card}
                   >
                     {/* Wishlist Button */}
                     <button
                       className={styles.wishlist_button}
-                      onClick={(e) => e.stopPropagation()} // Prevent navigation
+                      onClick={(e) => e.stopPropagation()} // Prevent navigation when clicking
                     >
                       <IoHeartOutline />
                     </button>
@@ -168,7 +171,7 @@ const ExploreProducts = () => {
                       onClick={(e) => {
                         handleAddToCart(product);
                         e.stopPropagation();
-                      }} // Prevent navigation
+                      }} // Prevent navigation on click
                     >
                       <IoCartOutline className={styles.cart_icon} />
                       <span>Add to Cart</span>

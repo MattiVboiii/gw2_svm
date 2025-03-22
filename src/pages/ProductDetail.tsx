@@ -10,7 +10,12 @@ import api from "../api";
 import { toast } from "react-toastify";
 
 const ProductDetail = () => {
+  // Extract the full slug from the URL
   const { slug } = useParams();
+  // If your URL is in the form: "essentiel-antwerp-123abc",
+  // split and use the last element as productId
+  const productId = slug ? slug.split("-").pop() : "";
+
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -104,19 +109,16 @@ const ProductDetail = () => {
       try {
         const response = await api.get<Product[]>("/products");
         const data = response.data;
-
-        // Find the product by comparing generated slugs
-        const matchedProduct = data.find((p) => generateSlug(p.name) === slug);
-
+        // Find product by matching _id
+        const matchedProduct = data.find((p) => p._id === productId);
         setProduct(matchedProduct || null);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching product:", error);
       }
     };
-
     fetchProducts();
-  }, [slug]);
+  }, [productId]);
 
   if (isLoading) {
     return <p>Loading...</p>;

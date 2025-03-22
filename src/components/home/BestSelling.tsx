@@ -91,7 +91,10 @@ const BestSelling = () => {
           displayedProducts.map((product) => (
             <Link
               key={product._id}
-              to={`/product/${product.slug}`} // Ensure slug exists
+              // Use product.slug or generate one if missing, then append the unique product id
+              to={`/product/${product.slug || generateSlug(product.name)}-${
+                product._id
+              }`}
               className={styles.product_card}
             >
               {/* Wishlist Button */}
@@ -117,7 +120,9 @@ const BestSelling = () => {
               {/* Price with old price */}
               <p className={styles.product_price}>
                 ${product.price}
-                <span className={styles.old_price}>${getOldPrice(product.price)}</span>
+                <span className={styles.old_price}>
+                  ${getOldPrice(product.price)}
+                </span>
               </p>
 
               {/* Rating */}
