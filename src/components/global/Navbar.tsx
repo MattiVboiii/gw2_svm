@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CiSearch, CiHeart, CiShoppingCart } from "react-icons/ci";
 import { Link } from "react-router";
+import { toast } from "react-toastify";
 import styles from "/src/styles/global/Navbar.module.css";
 import api from "../../api"; // Import your API utility
 
@@ -9,6 +10,7 @@ const GUEST_CART_KEY = "guestCart";
 const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [wishlistItemCount, setWishlistItemCount] = useState(0);
   const token = localStorage.getItem("token");
 
   const handleSearchClick = () => {
@@ -33,7 +35,7 @@ const Navbar = () => {
         );
         setCartItemCount(totalQuantity);
       } catch (error) {
-        console.error("Error fetching cart:", error);
+        toast.error("Error fetching cart:");
       }
     } else {
       // Load guest cart from localStorage
@@ -46,6 +48,17 @@ const Navbar = () => {
         0
       );
       setCartItemCount(totalQuantity);
+
+      // Load guest wishlist from localStorage
+      const guestWishlist = localStorage.getItem(GUEST_WISHLIST_KEY);
+      const guestWishlistItems = guestWishlist ? JSON.parse(guestWishlist) : [];
+
+      // Calculate total quantity of guest wishlist items
+      const totalWishlistQuantity = guestWishlistItems.reduce(
+        (total: number, item: { quantity: number }) => total + item.quantity,
+        0
+      );
+      setWishlistItemCount(totalWishlistQuantity);
     }
   };
 
@@ -82,6 +95,7 @@ const Navbar = () => {
                 onClick={() => {
                   localStorage.removeItem("token");
                   window.location.reload();
+                  toast.success("Logged out successfully!");
                 }}
               >
                 Logout
@@ -94,20 +108,27 @@ const Navbar = () => {
         )}
         <ul className={styles.icons}>
           <li>
-            <CiSearch className="search-icon" onClick={handleSearchClick} />
+            <CiSearch
+              size={20}
+              className="search-icon"
+              onClick={handleSearchClick}
+            />
           </li>
           <li>
             <Link to="/wishlist">
-              <CiHeart className="heart-icon" />
+              <CiHeart size={20} className="heart-icon" />
             </Link>
+            {wishlistItemCount > 0 && (
+              <span className={styles.wishlist_badge}>{wishlistItemCount}</span>
+            )}
           </li>
           <li>
             <Link to="/cart" className={styles.cart_link}>
-              <CiShoppingCart className="cart-icon" />
-              {cartItemCount > 0 && (
-                <span className={styles.cart_badge}>{cartItemCount}</span>
-              )}
+              <CiShoppingCart size={20} className={styles.cart_icon} />
             </Link>
+            {cartItemCount > 0 && (
+              <span className={styles.cart_badge}>{cartItemCount}</span>
+            )}
           </li>
         </ul>
       </nav>
