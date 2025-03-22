@@ -49,12 +49,14 @@ const Navbar = () => {
         {showSearch && (
           <input type="text" placeholder="What are you looking for?" />
         )}
-        <ul className={`${styles.icons}`}>
+        <ul className={styles.icons}>
           <li>
             <CiSearch className="search-icon" onClick={handleSearchClick} />
           </li>
           <li>
-            <CiHeart className="heart-icon" />
+            <Link to="/wishlist">
+              <CiHeart className="heart-icon" />
+            </Link>
           </li>
           <li>
             <Link to="/cart">

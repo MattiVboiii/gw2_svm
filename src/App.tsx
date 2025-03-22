@@ -7,6 +7,7 @@ import Homepage from "./pages/Homepage";
 import AllProducts from "./pages/AllProducts";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import Wishlist from "./pages/Wishlist";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import { Routes, Route } from "react-router";
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/allproducts" element={<AllProducts />} />
         <Route path="/product/:slug" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
       </Routes>
