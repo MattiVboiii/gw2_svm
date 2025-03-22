@@ -45,3 +45,15 @@ export interface CartItem {
   quantity: number;
   _id: string;
 }
+// Props to receive the target date for countdown
+export type CountdownProps = {
+  date: string;
+};
+
+// Structure of the remaining time
+export type TimeLeft = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
