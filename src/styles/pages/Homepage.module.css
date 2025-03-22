@@ -1,0 +1,38 @@
+.homeContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 1rem;
+}
+
+.sidebarContainer {
+  display: flex;
+  width: 100%;
+  gap: 1rem; /* adjust gap as needed */
+  margin-bottom: 1rem;
+}
+
+.navContainer {
+  width: auto; /* navigation takes as much space as needed */
+  /* Optionally add top/left margins here if required */
+}
+
+.banner {
+  flex: 1; /* banner takes remaining space */
+  max-width: auto; /* remove any maximum width limitation */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar {
+  width: 100%; /* sidebar spans full width */
+  margin-bottom: 1rem; /* spacing below the navigation area */
+}
+
+.mainContent {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

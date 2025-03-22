@@ -1,0 +1,113 @@
+.nav {
+  width: 217px;
+  border: none;
+  padding: 2.5rem 0;
+  margin-left: 120px;
+  margin-top: 40px;
+  background-color: var(--primaryWhite);
+  display: flex;
+  flex-direction: column;
+}
+
+.categoryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.categoryItem {
+  width: 100%;
+  font-size: 2rem;
+}
+
+.categoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  cursor: pointer;
+  padding: 0;
+  background-color: var(--primaryWhite);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: 4px;
+}
+
+.categoryHeader:hover {
+  background-color: var(--redAccent);
+  color: var(--primaryWhite);
+}
+
+.chevronButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: inherit;
+  display: flex;
+  align-items: center;
+}
+
+.subcategoryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.subcategoryList.expanded {
+  max-height: 500px;
+  margin-top: 2rem;
+}
+
+.subcategoryItem {
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.subcategoryItem:hover {
+  color: var(--redAccent);
+}
+
+/* Skeleton loading styles */
+.skeletonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 217px;
+  margin-left: 120px;
+  margin-top: 40px;
+}
+
+.skeletonItem {
+  width: 217px;
+  height: 1.5rem;
+  background: #e0e0e0;
+  border-radius: 4px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Hide chevron icon for categories with no subcategories */
+.categoryItem:not(:has(.subcategoryItem)) .chevronButton {
+  display: none;
+}
