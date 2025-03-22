@@ -1,26 +1,44 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { filterProducts, selectFilteredProducts } from "../../store/productsSlice";
-import api from "../../api"; 
+import { useDispatch } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import { filterProducts } from "../../store/productsSlice";
+import api from "../../api";
 import styles from "../../styles/home/CategorySection.module.css";
 import { IoStarOutline } from "react-icons/io5";
 
 const CategorySection: React.FC = () => {
   const dispatch = useDispatch();
-  const filteredProducts = useSelector(selectFilteredProducts);
-  const selectedCategory = filteredProducts.length > 0 ? filteredProducts[0]?.category?.name : "all";
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  const params = new URLSearchParams(location.search);
+  const categoryFromURL = params.get("category");
+
+  // Local state for all categories fetched from the API
   const [categories, setCategories] = useState<{ name: string; value: string }[]>([]);
+
+  // Track the currently selected category
+  const [activeCategory, setActiveCategory] = useState<string>("");
+
+  useEffect(() => {
+    // Update activeCategory when URL changes
+    setActiveCategory(categoryFromURL || "");
+  }, [categoryFromURL]);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await api.get<{ name: string }[]>("/categories");
+
+        const slugify = (str: string) =>
+          str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
         const categoriesData = response.data.map((cat) => ({
           name: cat.name,
-          value: cat.name.toLowerCase(),
+          value: slugify(cat.name),
         }));
-        setCategories([{ name: "All", value: "all" }, ...categoriesData]); 
+
+        setCategories([{ name: "All", value: "all" }, ...categoriesData]);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -29,13 +47,11 @@ const CategorySection: React.FC = () => {
     fetchCategories();
   }, []);
 
+  // When a category is clicked
   const handleCategoryClick = (category: string) => {
-    console.log("Clicked category:", category);
-    if (category === "all") {
-      dispatch(filterProducts("")); 
-    } else {
-      dispatch(filterProducts(category));
-    }
+    setActiveCategory(category); // Update local active category
+    dispatch(filterProducts(category === "all" ? "" : category));
+    navigate(`/allproducts?category=${category}`);
   };
 
   return (
@@ -44,16 +60,20 @@ const CategorySection: React.FC = () => {
         <span className={styles.categoryRectangle}></span>
         <p className={styles.categoryText}>Categories</p>
       </div>
+
       <h2 className={styles.categoryTitle}>Browse By Category</h2>
+
       <div className={styles.categoryContainer}>
         {categories.length > 0 ? (
           categories.map((category) => (
             <button
               key={category.value}
-              className={`${styles.categoryButton} ${selectedCategory === category.value ? styles.active : ""}`}
+              className={`${styles.categoryButton} ${
+                activeCategory === category.value ? styles.active : ""
+              }`}
               onClick={() => handleCategoryClick(category.value)}
             >
-              {category.name === "All" ? <IoStarOutline /> : null}
+              {category.name === "All" && <IoStarOutline />}
               {category.name}
             </button>
           ))

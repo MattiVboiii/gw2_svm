@@ -4,6 +4,10 @@ import { Product, ProductsState } from "../types";
 import api from "../api";
 import { Dispatch } from "redux";
 
+// Normalizes category names into slug format for reliable comparison
+const normalizeCategory = (cat: string) =>
+  cat.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
 // Initial state: stores the list of products, filtered products, and current page
 const initialState: ProductsState = {
   products: [],
@@ -66,17 +70,26 @@ const productsReducer = (
         products: action.payload,
         filteredProducts: action.payload, // Initially, filtered products are the same as all products
       };
-    case FILTER_PRODUCTS:
-      return {
-        ...state,
-        filteredProducts: action.payload
-          ? state.products.filter(
-              (product) =>
-                product.category?.name.toLowerCase() ===
-                action.payload.toLowerCase()
-            )
-          : state.products,
-      };
+      case FILTER_PRODUCTS: {
+        const normalizedCategory = normalizeCategory(action.payload);
+      
+        // If category is 'all' or empty, return all products
+        if (!normalizedCategory || normalizedCategory === "all") {
+          return {
+            ...state,
+            filteredProducts: state.products,
+          };
+        }
+      
+        // Otherwise, apply normalized filtering
+        return {
+          ...state,
+          filteredProducts: state.products.filter(
+            (product) =>
+              normalizeCategory(product.category?.name || "") === normalizedCategory
+          ),
+        };
+      }          
 
     case SET_PAGE:
       return {
