@@ -70,26 +70,27 @@ const productsReducer = (
         products: action.payload,
         filteredProducts: action.payload, // Initially, filtered products are the same as all products
       };
-      case FILTER_PRODUCTS: {
-        const normalizedCategory = normalizeCategory(action.payload);
-      
-        // If category is 'all' or empty, return all products
-        if (!normalizedCategory || normalizedCategory === "all") {
-          return {
-            ...state,
-            filteredProducts: state.products,
-          };
-        }
-      
-        // Otherwise, apply normalized filtering
-        return {
-          ...state,
-          filteredProducts: state.products.filter(
-            (product) =>
-              normalizeCategory(product.category?.name || "") === normalizedCategory
-          ),
-        };
-      }          
+     case FILTER_PRODUCTS: {
+  const normalizedCategory = normalizeCategory(action.payload);
+
+  // If category is 'all' or empty, return all products
+  if (!normalizedCategory || normalizedCategory === "all") {
+    return {
+      ...state,
+      filteredProducts: state.products,
+    };
+  }
+
+  // Otherwise, apply normalized filtering
+  return {
+    ...state,
+    filteredProducts: state.products.filter(
+      (product) =>
+        normalizeCategory(product.category?.name || "") === normalizedCategory
+    ),
+  };
+}
+    
 
     case SET_PAGE:
       return {

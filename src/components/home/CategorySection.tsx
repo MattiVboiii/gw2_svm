@@ -5,6 +5,8 @@ import { filterProducts } from "../../store/productsSlice";
 import api from "../../api";
 import styles from "../../styles/home/CategorySection.module.css";
 import { IoStarOutline } from "react-icons/io5";
+import { GiClothes, GiDress, GiBelt } from "react-icons/gi";
+import { FaTags } from "react-icons/fa";
 
 const CategorySection: React.FC = () => {
   const dispatch = useDispatch();
@@ -73,8 +75,12 @@ const CategorySection: React.FC = () => {
               }`}
               onClick={() => handleCategoryClick(category.value)}
             >
-              {category.name === "All" && <IoStarOutline />}
-              {category.name}
+               {category.name === "All" && <IoStarOutline className={styles.categoryIcon} />}
+              {category.name === "Men's Fashion" && <GiClothes className={styles.categoryIcon} />}
+              {category.name === "Women's Fashion" && <GiDress className={styles.categoryIcon} />}
+              {category.name === "Accessories" && <GiBelt className={styles.categoryIcon} />}
+              {category.name === "Sale" && <FaTags className={styles.categoryIcon} />}
+              <span className={styles.categoryName}>{category.name}</span>
             </button>
           ))
         ) : (
