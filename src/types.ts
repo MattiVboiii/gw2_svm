@@ -47,8 +47,21 @@ export interface CartItem {
 }
 
 export interface WishlistItem {
-  _id: string; // Assuming this is the product ID from the API response
+  _id: string;
   name: string;
   images: string[];
   price: number;
 }
+
+// Props to receive the target date for countdown
+export type CountdownProps = {
+  date: string;
+};
+
+// Structure of the remaining time
+export type TimeLeft = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
