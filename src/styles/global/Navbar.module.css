@@ -65,6 +65,15 @@ nav {
       &:hover {
         color: var(--redAccent);
       }
+      .wishlist_badge {
+        background-color: var(--redAccent);
+        color: white;
+        padding: 0.25vh 0.5vw;
+        border-radius: 100px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-left: 0.25rem;
+      }
       .cart_badge {
         background-color: var(--redAccent);
         color: white;

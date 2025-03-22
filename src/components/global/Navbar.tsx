@@ -6,6 +6,7 @@ import styles from "/src/styles/global/Navbar.module.css";
 import api from "../../api"; // Import your API utility
 
 const GUEST_CART_KEY = "guestCart";
+const GUEST_WISHLIST_KEY = "guestWishlist";
 
 const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
@@ -18,52 +19,51 @@ const Navbar = () => {
   };
 
   // Function to load the cart and count total items
-  const loadCartCount = async () => {
+  const loadCartAndWishlistCount = async () => {
     if (token) {
       try {
-        const response = await api.get<{ items: { quantity: number }[] }>(
-          "/cart",
-          {
+        const [cartResponse, wishlistResponse] = await Promise.all([
+          api.get<{ items: { quantity: number }[] }>("/cart", {
             headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+          }),
+          api.get<{ products: { id: number }[] }>("/wishlist", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-        // Calculate total quantity of all items
-        const totalQuantity = response.data.items.reduce(
+        // Calculate total quantity of all items in the cart
+        const totalQuantity = cartResponse.data.items.reduce(
           (total, item) => total + item.quantity,
           0
         );
         setCartItemCount(totalQuantity);
+
+        // Calculate total quantity of all items in the wishlist
+        const totalWishlistQuantity = wishlistResponse.data.products.length;
+        setWishlistItemCount(totalWishlistQuantity);
       } catch (error) {
-        toast.error("Error fetching cart:");
+        toast.error("Error fetching cart and wishlist:");
       }
     } else {
-      // Load guest cart from localStorage
+      // Load guest cart and wishlist from localStorage
       const guestCart = localStorage.getItem(GUEST_CART_KEY);
       const guestItems = guestCart ? JSON.parse(guestCart) : [];
 
       // Calculate total quantity of guest cart items
-      const totalQuantity = guestItems.reduce(
-        (total: number, item: { quantity: number }) => total + item.quantity,
-        0
-      );
+      const totalQuantity = guestItems.length;
       setCartItemCount(totalQuantity);
 
-      // Load guest wishlist from localStorage
       const guestWishlist = localStorage.getItem(GUEST_WISHLIST_KEY);
       const guestWishlistItems = guestWishlist ? JSON.parse(guestWishlist) : [];
 
       // Calculate total quantity of guest wishlist items
-      const totalWishlistQuantity = guestWishlistItems.reduce(
-        (total: number, item: { quantity: number }) => total + item.quantity,
-        0
-      );
+      const totalWishlistQuantity = guestWishlistItems.length;
       setWishlistItemCount(totalWishlistQuantity);
     }
   };
 
   useEffect(() => {
-    loadCartCount();
+    loadCartAndWishlistCount();
   }, [token]);
 
   return (
@@ -115,8 +115,8 @@ const Navbar = () => {
             />
           </li>
           <li>
-            <Link to="/wishlist">
-              <CiHeart size={20} className="heart-icon" />
+            <Link to="/wishlist" className={styles.wishlist_link}>
+              <CiHeart size={20} className={styles.wishlist_icon} />
             </Link>
             {wishlistItemCount > 0 && (
               <span className={styles.wishlist_badge}>{wishlistItemCount}</span>
