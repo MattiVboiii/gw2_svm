@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { IoCartOutline, IoHeartOutline } from "react-icons/io5";
+import { IoCartOutline, IoHeart, IoHeartOutline } from "react-icons/io5";
 import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { Link } from "react-router";
 import { Product } from "../types";
@@ -17,6 +17,7 @@ import {
 } from "../store/productsSlice";
 import api from "../api";
 import Button from "../components/global/Button";
+import { toast } from "react-toastify";
 
 const generateSlug = (name: string) =>
   name
@@ -34,49 +35,79 @@ const AllProducts = () => {
   const [categories, setCategories] = useState<
     { name: string; value: string }[]
   >([]);
+  const [wishlistItems, setWishlistItems] = useState<string[]>([]); // Stores Wishlist Product IDs
+  const [isUpdatingWishlist, setIsUpdatingWishlist] = useState<boolean>(false); // Indicates if Wishlist is being updated
 
-  // Function to add a product to the cart
-  const handleAddToCart = async (product: Product) => {
-    if (localStorage.getItem("token")) {
-      try {
-        await api.post<{ message: string }>(
-          "/cart",
-          {
-            productId: product._id,
-            variantId: product.variants[0]._id,
-            quantity: 1,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        console.log(`${product.name} added to cart`);
-      } catch (error: any) {
-        console.error("Error adding product to cart:", error.message);
-      }
-    } else {
-      console.log("Please login to add product to cart");
+  const token = localStorage.getItem("token");
+
+  // Fetch Wishlist and store product IDs
+  const fetchWishlist = async () => {
+    if (!token) return;
+
+    try {
+      const response = await api.get<{ products: { _id: string }[] }>(
+        "/wishlist",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const wishlistProductIds = response.data.products.map(
+        (product) => product._id
+      );
+      setWishlistItems(wishlistProductIds);
+    } catch (error: any) {
+      toast.error("Error fetching wishlist: " + error.message);
     }
   };
 
-  // Fetch products from the API when the component mounts
+  // Add or Remove from Wishlist
+  const handleToggleWishlist = async (product: Product) => {
+    try {
+      setIsUpdatingWishlist(true);
+      if (wishlistItems.includes(product._id)) {
+        // Remove from Wishlist
+        await api.delete(`/wishlist/${product._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setIsUpdatingWishlist(false);
+        toast.success(`${product.name} removed from wishlist!`);
+        setWishlistItems((prev) => prev.filter((id) => id !== product._id));
+      } else {
+        // Add to Wishlist
+        await api.post(
+          "/wishlist",
+          { productId: product._id },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setWishlistItems((prev) => [...prev, product._id]);
+        setIsUpdatingWishlist(false);
+        toast.success(`${product.name} added to wishlist!`);
+      }
+    } catch (error: any) {
+      setIsUpdatingWishlist(false);
+      toast.error("Error updating wishlist: " + error.message);
+    }
+  };
+
+  // Fetch Products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await api.get<Product[]>("/products");
-        dispatch(getProducts(response.data)); // Store products in Redux state
+        dispatch(getProducts(response.data)); // Store products in Redux
         setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching products:", error);
+      } catch (error: any) {
+        toast.error("Error fetching products: " + error.message);
       }
     };
 
     fetchProducts();
-  }, [dispatch]);
+    if (token) fetchWishlist(); // Fetch wishlist if logged in
+  }, [dispatch, token]);
 
-  // Fetch categories from API
+  // Fetch Categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -86,26 +117,25 @@ const AllProducts = () => {
           value: cat.name.toLowerCase(),
         }));
         setCategories([{ name: "All", value: "all" }, ...categoriesData]);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
+      } catch (error: any) {
+        toast.error("Error fetching categories: " + error.message);
       }
     };
 
     fetchCategories();
   }, []);
 
-  // Handle category filtering
+  // Handle Category Filtering
   const handleFilterChange = (categoryName: string) => {
-    console.log("Selected category:", categoryName);
     if (categoryName === "all") {
-      dispatch(getProducts(products)); // Reset to all products
+      dispatch(getProducts(products)); // Show all products
     } else {
       dispatch(filterProducts(categoryName)); // Filter products by category
     }
-    dispatch(setPage(1)); // Reset pagination to first page
+    dispatch(setPage(1)); // Reset pagination
   };
 
-  // Pagination calculations
+  // Pagination
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(
@@ -124,11 +154,7 @@ const AllProducts = () => {
           <h1>
             {filteredProducts.length === products.length
               ? "All Products"
-              : `Products in ${
-                  filteredProducts.length
-                    ? filteredProducts[0]?.category?.name
-                    : "All"
-                }`}
+              : "Filtered Products"}
           </h1>
           <div className={styles.products_per_page}>
             <label htmlFor="products_per_page">Products per page:</label>
@@ -144,7 +170,7 @@ const AllProducts = () => {
               }
             />
           </div>
-          {/* Category filter buttons */}
+          {/* Category Filter Buttons */}
           <div className={styles.category_buttons}>
             {categories.map(({ name, value }) => (
               <button
@@ -154,8 +180,6 @@ const AllProducts = () => {
                     ? name === "All"
                       ? styles.active_button
                       : undefined
-                    : filteredProducts[0]?.category?.name === name
-                    ? styles.active_button
                     : undefined
                 }
                 onClick={() => handleFilterChange(value)}
@@ -164,19 +188,28 @@ const AllProducts = () => {
               </button>
             ))}
           </div>
-          {/* Product list */}
+          {/* Product List */}
           <section className={styles.product_container}>
-            {currentProducts.map((product: Product) => (
+            {currentProducts.map((product) => (
               <section key={product._id} className={styles.product}>
+                {/* Wishlist Button */}
+                <button
+                  className={styles.wishlist_button}
+                  onClick={() => handleToggleWishlist(product)}
+                  disabled={isUpdatingWishlist}
+                >
+                  {wishlistItems.includes(product._id) ? (
+                    <IoHeart color="red" />
+                  ) : (
+                    <IoHeartOutline />
+                  )}
+                </button>
                 <Link
                   to={`/product/${product.slug || generateSlug(product.name)}-${
                     product._id
                   }`}
                 >
                   <img src={product.images[0]} alt={product.name} />
-                  <button className={styles.wishlist_button}>
-                    <IoHeartOutline size={20} />
-                  </button>
                   <h2>{product.name}</h2>
                   <p>${product.price}</p>
                   <p className={styles.ratings}>
@@ -195,10 +228,9 @@ const AllProducts = () => {
                   variant="primary"
                   size="small"
                   className={styles.cart_button}
-                  onClick={() => handleAddToCart(product)}
+                  onClick={() => toast.info("Add to Cart")}
                 >
-                  <IoCartOutline size={20} />
-                  Add to Cart
+                  <IoCartOutline size={20} /> Add to Cart
                 </Button>
               </section>
             ))}

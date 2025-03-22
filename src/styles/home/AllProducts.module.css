@@ -48,6 +48,21 @@
       border-radius: 5px;
       padding: 1.5rem;
       transition: all 0.2s ease-in-out;
+      .wishlist_button {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: var(--black);
+        font-size: 1.5rem;
+        transition: all 0.2s ease-in-out;
+        z-index: 1;
+        &:hover {
+          color: var(--redAccent);
+        }
+      }
       a {
         text-decoration: none;
         color: inherit;
@@ -62,20 +77,6 @@
         button {
           background: transparent;
           border: none;
-        }
-        .wishlist_button {
-          position: absolute;
-          top: 1rem;
-          right: 1rem;
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          color: var(--black);
-          font-size: 1.5rem;
-          transition: all 0.2s ease-in-out;
-          &:hover {
-            color: var(--redAccent);
-          }
         }
         .ratings {
           margin-bottom: 1vh;
