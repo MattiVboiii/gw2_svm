@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { WishlistItem } from "../types";
+import { Product, WishlistItem } from "../types";
 import styles from "../styles/home/Wishlist.module.css";
-import { FaTrash } from "react-icons/fa";
 import Button from "../components/global/Button";
 import api from "../api";
+import { FaTrash } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const Wishlist = () => {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
@@ -22,10 +23,10 @@ const Wishlist = () => {
               },
             }
           );
-          const items = response.data.products; // Adjusted to get products
+          const items = response.data.products;
           setWishlistItems(items);
         } catch (error: any) {
-          console.error("Error fetching wishlist:", error.message);
+          toast.error("Error fetching wishlist");
         } finally {
           setIsLoading(false);
         }
@@ -37,37 +38,42 @@ const Wishlist = () => {
 
   const handleRemove = async (productId: string) => {
     try {
-      const items = wishlistItems.filter(
-        (item) => item._id !== productId // Adjusted to use _id
-      );
+      const items = wishlistItems.filter((item) => item._id !== productId);
       setWishlistItems(items);
       await api.delete(`/wishlist/${productId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+      toast.success(
+        `${
+          wishlistItems.find((i) => i._id === productId)?.name
+        } removed from wishlist`
+      );
     } catch (error: any) {
-      console.error("Error removing item from wishlist:", error.message);
+      toast.error("Error removing item from wishlist");
     }
   };
 
-  const handleAddToCart = async (productId: string) => {
+  const handleAddToCart = async (product: Product) => {
     try {
-      await api.post(
+      await api.post<{ message: string }>(
         "/cart",
-        { productId },
+        {
+          productId: product._id,
+          variantId: product.variants[0]._id,
+          quantity: 1,
+        },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      const items = wishlistItems.filter(
-        (item) => item._id !== productId // Adjusted to use _id
-      );
-      setWishlistItems(items);
+      await handleRemove(product._id);
+      toast.success(`${product.name} added to cart`);
     } catch (error: any) {
-      console.error("Error adding item to cart:", error.message);
+      toast.error(`Error adding item to cart: ${error.message}`);
     }
   };
 
@@ -80,49 +86,32 @@ const Wishlist = () => {
         <p>Your wishlist is empty</p>
       ) : (
         <div className={styles.wishlist_content}>
-          <table className={styles.wishlist_table}>
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Add to Cart</th>
-                <th>Remove</th>
-              </tr>
-            </thead>
-            <tbody>
-              {wishlistItems.map((item) => (
-                <tr key={item._id}>
-                  <td>
-                    <a
-                      href={`/product/${item._id
-                        .toLowerCase()
-                        .replace(/ /g, "-")}`}
-                    >
-                      {item.name}
-                    </a>
-                  </td>
-                  <td>${item.price}</td>
-                  {/* You may want to update this to show actual price */}
-                  <td>
-                    <Button
-                      variant="primary"
-                      size="small"
-                      onClick={() => handleAddToCart(item._id)}
-                    >
-                      Add to Cart
-                    </Button>
-                  </td>
-                  <td>
-                    <FaTrash
-                      className={styles.remove}
-                      size={20}
-                      onClick={() => handleRemove(item._id)}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className={styles.wishlist_cards}>
+            {wishlistItems.map((item) => (
+              <div key={item._id} className={styles.wishlist_card}>
+                <button
+                  className={styles.remove_button}
+                  onClick={() => handleRemove(item._id)}
+                >
+                  <FaTrash />
+                </button>
+                <img
+                  src={item.images[0]}
+                  alt={item.name}
+                  className={styles.wishlist_image}
+                />
+                <Button
+                  variant="primary"
+                  size="small"
+                  onClick={() => handleAddToCart(item as Product)}
+                >
+                  Add to Cart
+                </Button>
+                <h2>{item.name}</h2>
+                <p>${item.price}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

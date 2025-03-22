@@ -1,82 +1,63 @@
 .container {
-  padding: 5vh 10vw;
-  background-color: var(--primaryWhite);
-  min-height: 80vh;
+  padding: 5vh 5vw;
   h1 {
-    font-size: 2rem;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
     font-weight: bold;
-    margin-bottom: 2vh;
   }
   .wishlist_content {
-    .wishlist_table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 4vh;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      th,
-      td {
-        padding: 2rem 2vw;
-        text-align: center;
-        vertical-align: middle;
-        border-bottom: 1px solid var(--grey);
-      }
-      thead {
-        box-shadow: 0 0.5vh 1vh rgba(0, 0, 0, 0.2);
-        font-size: 2rem;
-        font-weight: bold;
-      }
-      td {
-        font-size: 1.7rem;
-      }
-      img {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        margin-right: 1vw;
-      }
-      a {
-        text-decoration: none;
-        color: inherit;
-        transition: all 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    .wishlist_cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin: 2vh 0;
+      .wishlist_card {
         position: relative;
-        &:hover {
-          color: var(--redAccent);
-        }
-        &::before {
-          content: "";
-          position: absolute;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+        padding: 1.5rem;
+        transition: all 0.2s ease-in-out;
+        text-align: center;
+        max-height: 30vh;
+        .wishlist_image {
+          height: 20vh;
           width: 100%;
-          height: 0.15vh;
-          bottom: -0.5vh;
-          left: 0;
-          background-color: var(--redAccent);
-          visibility: hidden;
-          transform: scaleX(0);
+          object-fit: contain;
+          object-position: center;
+          margin: 1vh auto;
           transition: all 0.2s ease-in-out;
         }
-        &:hover::before {
-          visibility: visible;
-          transform: scaleX(1);
+        h2 {
+          font-weight: bold;
+          font-size: 1.5rem;
+          margin: 0.5vh 0;
         }
-      }
-      .remove {
-        color: var(--redAccent);
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
+        p {
+          font-size: 1.5rem;
+          font-weight: bold;
+          margin-bottom: 1vh;
+        }
+        .remove_button {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          color: var(--black);
+          transition: all 0.2s ease-in-out;
+          &:hover {
+            color: var(--redAccent);
+          }
+        }
         &:hover {
-          color: var(--hoverButton);
-          transform: scale(1.25) rotate(10deg);
+          box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.4);
         }
       }
-    }
-    .quantity_selector {
-      padding: 0.5rem;
-      border: 1px solid var(--grey);
-      border-radius: 5px;
-      background: white;
-      cursor: pointer;
     }
   }
 }
