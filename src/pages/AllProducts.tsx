@@ -18,6 +18,12 @@ import {
 import api from "../api";
 import Button from "../components/global/Button";
 
+const generateSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 const AllProducts = () => {
   const dispatch = useDispatch();
   const products = useSelector(selectProducts) as Product[];
@@ -53,13 +59,6 @@ const AllProducts = () => {
     } else {
       console.log("Please login to add product to cart");
     }
-  };
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
   };
 
   // Fetch products from the API when the component mounts
@@ -169,7 +168,11 @@ const AllProducts = () => {
           <section className={styles.product_container}>
             {currentProducts.map((product: Product) => (
               <section key={product._id} className={styles.product}>
-                <Link to={`/product/${generateSlug(product.name)}`}>
+                <Link
+                  to={`/product/${product.slug || generateSlug(product.name)}-${
+                    product._id
+                  }`}
+                >
                   <img src={product.images[0]} alt={product.name} />
                   <button className={styles.wishlist_button}>
                     <IoHeartOutline size={20} />
