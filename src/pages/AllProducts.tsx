@@ -125,6 +125,28 @@ const AllProducts = () => {
     fetchCategories();
   }, []);
 
+  // Handle Add to Cart
+  const handleAddToCart = async (product: Product) => {
+    try {
+      await api.post(
+        "/cart",
+        {
+          productId: product._id,
+          variantId: product.variants[0]._id,
+          quantity: 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success(`${product.name} added to cart!`);
+    } catch (error: any) {
+      toast.error("Error adding to cart: " + error.message);
+    }
+  };
+
   // Handle Category Filtering
   const handleFilterChange = (categoryName: string) => {
     if (categoryName === "all") {
@@ -228,7 +250,7 @@ const AllProducts = () => {
                   variant="primary"
                   size="small"
                   className={styles.cart_button}
-                  onClick={() => toast.info("Add to Cart")}
+                  onClick={() => handleAddToCart(product)}
                 >
                   <IoCartOutline size={20} /> Add to Cart
                 </Button>
