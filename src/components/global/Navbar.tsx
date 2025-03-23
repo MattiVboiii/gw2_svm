@@ -4,7 +4,7 @@ import { Link } from "react-router";
 import { toast } from "react-toastify";
 import styles from "/src/styles/global/Navbar.module.css";
 import api from "../../api"; // Import your API utility
-
+import logo from "/src/assets/images/logo.png";
 const GUEST_CART_KEY = "guestCart";
 const GUEST_WISHLIST_KEY = "guestWishlist";
 
@@ -69,7 +69,10 @@ const Navbar = () => {
   return (
     <>
       <nav>
-        <h1>Headless Clothing Store</h1>
+      <div className={styles.logoContainer}>
+  <img src={logo} alt="Urban Indigo Logo" className={styles.logo} />
+</div>
+
         <ul>
           <li>
             <Link to="/">Home</Link>
