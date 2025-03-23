@@ -1,0 +1,127 @@
+.card {
+  min-width: 300px;
+  max-width: 370px;
+  height: 370px;
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  text-decoration: none;
+}
+
+.wishlist_button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.8rem;
+  color: var(--black);
+  transition: color 0.2s ease-in-out;
+}
+
+.wishlist_button:hover {
+  color: var(--redAccent);
+}
+
+.product_image {
+  width: 100%;
+  height: 280px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.product_name {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--black);
+}
+
+.price_block {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  justify-content: flex-start;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.product_price {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--redAccent);
+  margin-bottom: 0;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.old_price {
+  font-size: 1.8rem;
+  font-weight: normal;
+  text-decoration: line-through;
+  color: var(--grey);
+  margin-left: 1rem;
+}
+
+.product_rating {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  line-height: 2;
+  margin-top: 1rem;
+}
+
+/* Add to Cart button */
+.add_to_cart {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--black);
+  color: white;
+  padding: 0.8rem;
+  border: none;
+  cursor: pointer;
+  font-size: 2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  border-radius: 0;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  min-height: 60px;
+  min-width: 100%;
+}
+
+.card:hover .add_to_cart {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.discount_badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: var(--redAccent);
+  color: white;
+  padding: 0.3rem 0.6rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 5px;
+  z-index: 1;
+}

@@ -1,6 +1,24 @@
+export type ProductCardProps = Pick<
+  Product,
+  "_id" | "slug" | "name" | "images" | "price" | "ratings"
+> & {
+  discountPercentage?: number;          // Optional discount %
+  onAddToCart?: () => void;            // Handler for Add to Cart
+  wishlistButton?: React.ReactNode;    // Optional custom heart icon
+  showAddToCart?: boolean;             // Show/hide cart button
+  showRating?: boolean;                // Show/hide stars
+  showDiscount?: boolean;              // Show/hide discount badge
+  customLink?: string;                 // Override link path
+  className?: string;                  // Custom class for wrapper
+  customImageStyle?: React.CSSProperties; // Custom style for image
+};
+
+
 export type ProductsState = {
   products: Product[];
   filteredProducts: Product[];
+  flashSales: Product[];
+  bestSelling: Product[];
   currentPage: number;
   productsPerPage: number;
 };
