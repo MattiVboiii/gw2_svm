@@ -9,7 +9,7 @@
 }
 
 .tag {
-  color: var(--redAccent, #db4444);
+  color: var(--redAccent);
   font-weight: bold;
   font-size: 1.6vh;
   display: flex;
@@ -31,6 +31,7 @@
   font-size: 3.6vh;
   font-weight: bold;
   margin-bottom: 5vh;
+  color: var(--black);
 }
 
 .grid {
