@@ -17,6 +17,8 @@ export type ProductCardProps = Pick<
 export type ProductsState = {
   products: Product[];
   filteredProducts: Product[];
+  flashSales: Product[];
+  bestSelling: Product[];
   currentPage: number;
   productsPerPage: number;
 };
