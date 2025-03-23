@@ -4,7 +4,7 @@ import api from "../../api";
 import styles from "../../styles/global/CategoryNavigation.module.css";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
-// Define types for clarity
+// Define types
 interface Category {
   _id: string;
   name: string;
@@ -60,14 +60,21 @@ const CategoryNavigation = () => {
     return subcategories.filter((sub) => sub.category._id === categoryId);
   };
 
-  // Navigate to AllProducts with filter set to the category name
+  // Navigate to AllProducts with filter set to the category name (if no subcategories exist)
   const handleCategoryClick = (categoryName: string) => {
-    navigate(`/allproducts?filter=${encodeURIComponent(categoryName)}`);
+    navigate(`/allproducts?category=${encodeURIComponent(categoryName)}`);
   };
 
   // Navigate to AllProducts with filter set to the subcategory name
-  const handleSubcategoryClick = (subName: string) => {
-    navigate(`/allproducts?filter=${encodeURIComponent(subName)}`);
+  const handleSubcategoryClick = (
+    subName: string,
+    parentCategoryName: string
+  ) => {
+    navigate(
+      `/allproducts?subcategory=${encodeURIComponent(
+        subName
+      )}&category=${encodeURIComponent(parentCategoryName)}`
+    );
   };
 
   // While loading, show skeleton loader
@@ -84,40 +91,60 @@ const CategoryNavigation = () => {
   return (
     <nav className={styles.nav}>
       <ul className={styles.categoryList}>
-        {categories.map((category) => (
-          <li key={category._id} className={styles.categoryItem}>
-            <div className={styles.categoryHeader}>
-              {/* Clicking on the category name navigates to the filtered products */}
-              <span onClick={() => handleCategoryClick(category.name)}>
-                {category.name}
-              </span>
-              <button
-                className={styles.chevronButton}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent navigation when toggling
-                  toggleCategory(category._id);
-                }}
-              >
-                {expanded[category._id] ? <IoIosArrowUp /> : <IoIosArrowDown />}
-              </button>
-            </div>
-            <ul
-              className={`${styles.subcategoryList} ${
-                expanded[category._id] ? styles.expanded : ""
-              }`}
-            >
-              {getSubcategoriesFor(category._id).map((sub) => (
-                <li
-                  key={sub._id}
-                  className={styles.subcategoryItem}
-                  onClick={() => handleSubcategoryClick(sub.name)}
+        {categories.map((category) => {
+          const subs = getSubcategoriesFor(category._id);
+          return (
+            <li key={category._id} className={styles.categoryItem}>
+              <div className={styles.categoryHeader}>
+                <span
+                  onClick={() => {
+                    if (subs.length === 0) {
+                      handleCategoryClick(category.name);
+                    } else {
+                      toggleCategory(category._id);
+                    }
+                  }}
                 >
-                  {sub.name}
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
+                  {category.name}
+                </span>
+                {subs.length > 0 && (
+                  <button
+                    className={styles.chevronButton}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent navigation when toggling
+                      toggleCategory(category._id);
+                    }}
+                  >
+                    {expanded[category._id] ? (
+                      <IoIosArrowUp />
+                    ) : (
+                      <IoIosArrowDown />
+                    )}
+                  </button>
+                )}
+              </div>
+              {subs.length > 0 && (
+                <ul
+                  className={`${styles.subcategoryList} ${
+                    expanded[category._id] ? styles.expanded : ""
+                  }`}
+                >
+                  {subs.map((sub) => (
+                    <li
+                      key={sub._id}
+                      className={styles.subcategoryItem}
+                      onClick={() =>
+                        handleSubcategoryClick(sub.name, sub.category.name)
+                      }
+                    >
+                      {sub.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );
