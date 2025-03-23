@@ -14,6 +14,7 @@ import FlashSales from "../components/home/FlashSales";
 import styles from "../styles/pages/Homepage.module.css"; // new CSS module for layout
 import HeroSection from "../components/home/HeroSection";
 import ShopBanner from "../components/home/ShopBanner";
+import NewArrivals from "../components/home/NewArrivals";
 
 const HomePage = () => {
   const dispatch: ThunkDispatch<RootState, undefined, Action> = useDispatch();
@@ -36,6 +37,7 @@ const HomePage = () => {
         <Best />
         <ShopBanner />
         <ExploreProducts />
+        <NewArrivals />
         <Advantages />
       </main>
     </div>
