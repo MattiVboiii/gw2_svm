@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IoCartOutline, IoHeart, IoHeartOutline } from "react-icons/io5";
 import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
-import { Link, useLocation } from "react-router-dom"; // For reading ?category=... from URL
+import { Link, useLocation } from "react-router-dom";
 import { Product } from "../types";
 import styles from "../styles/home/AllProducts.module.css";
 import {
@@ -45,7 +45,9 @@ const AllProducts = () => {
   const productsPerPage = useSelector(selectProductsPerPage) as number;
 
   const [isLoading, setIsLoading] = useState(true);
-  const [categories, setCategories] = useState<{ name: string; value: string }[]>([]);
+  const [categories, setCategories] = useState<
+    { name: string; value: string }[]
+  >([]);
   const [wishlistItems, setWishlistItems] = useState<string[]>([]);
   const [isUpdatingWishlist, setIsUpdatingWishlist] = useState(false);
 
@@ -58,7 +60,7 @@ const AllProducts = () => {
       const res = await api.get<{ products: { _id: string }[] }>("/wishlist", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const ids = res.data.products.map(p => p._id);
+      const ids = res.data.products.map((p) => p._id);
       setWishlistItems(ids);
     } catch (err: any) {
       toast.error("Error fetching wishlist: " + err.message);
@@ -73,7 +75,7 @@ const AllProducts = () => {
         await api.delete(`/wishlist/${product._id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setWishlistItems(prev => prev.filter(id => id !== product._id));
+        setWishlistItems((prev) => prev.filter((id) => id !== product._id));
         toast.success(`${product.name} removed from wishlist!`);
       } else {
         await api.post(
@@ -83,7 +85,7 @@ const AllProducts = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setWishlistItems(prev => [...prev, product._id]);
+        setWishlistItems((prev) => [...prev, product._id]);
         toast.success(`${product.name} added to wishlist!`);
       }
     } catch (error: any) {
@@ -111,18 +113,37 @@ const AllProducts = () => {
 
   // Apply filtering based on URL category
   useEffect(() => {
-    if (categoryFromURL && products.length > 0) {
-      dispatch(filterProducts(categoryFromURL));
-      dispatch(setPage(1));
+    if (products.length > 0) {
+      const params = new URLSearchParams(location.search);
+      const subcategoryFromURL = params.get("subcategory");
+      const categoryFromURL = params.get("category");
+
+      if (subcategoryFromURL && categoryFromURL) {
+        // Dispatch filter using both subcategory and category
+        dispatch(
+          filterProducts({
+            type: "subcategory",
+            value: { sub: subcategoryFromURL, category: categoryFromURL },
+          })
+        );
+        dispatch(setPage(1));
+      } else if (categoryFromURL) {
+        dispatch(filterProducts({ type: "category", value: categoryFromURL }));
+        dispatch(setPage(1));
+      } else {
+        // Optionally, reset the filter if no parameter present
+        dispatch(filterProducts({ type: "category", value: "all" }));
+        dispatch(setPage(1));
+      }
     }
-  }, [categoryFromURL, products, dispatch]);
+  }, [location.search, products, dispatch]);
 
   // Load categories from API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await api.get<{ name: string }[]>("/categories");
-        const categoriesData = res.data.map(cat => ({
+        const categoriesData = res.data.map((cat) => ({
           name: cat.name,
           value: normalizeCategory(cat.name),
         }));
@@ -137,7 +158,7 @@ const AllProducts = () => {
   // Manual category filter from buttons
   const handleFilterChange = (categoryName: string) => {
     const newCategory = categoryName === "all" ? "" : categoryName;
-  
+
     // change URL
     const url = new URL(window.location.href);
     if (newCategory) {
@@ -145,17 +166,17 @@ const AllProducts = () => {
     } else {
       url.searchParams.delete("category"); // delete if category is "all"
     }
-  
+
     // changing URL without page reload
     window.history.pushState({}, "", url.toString());
-  
+
     // redux filter
     if (newCategory) {
-      dispatch(filterProducts(newCategory));
+      dispatch(filterProducts({ type: "category", value: newCategory }));
     } else {
       dispatch(getProducts(products));
     }
-  
+
     dispatch(setPage(1));
   };
 
@@ -183,7 +204,10 @@ const AllProducts = () => {
   // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
 
   const paginate = (pageNumber: number) => dispatch(setPage(pageNumber));
 
@@ -194,7 +218,9 @@ const AllProducts = () => {
       ) : (
         <>
           <h1>
-            {filteredProducts.length === products.length ? "All Products" : "Filtered Products"}
+            {filteredProducts.length === products.length
+              ? "All Products"
+              : "Filtered Products"}
           </h1>
 
           {/* Select number of products per page */}
@@ -207,22 +233,23 @@ const AllProducts = () => {
               min={5}
               step={1}
               max={filteredProducts.length}
-              onChange={(e) => dispatch(setProductsPerPage(parseInt(e.target.value)))}
+              onChange={(e) =>
+                dispatch(setProductsPerPage(parseInt(e.target.value)))
+              }
             />
           </div>
 
           {/* Category filter buttons */}
           <div className={styles.category_buttons}>
-          {categories.map(({ name, value }) => (
-          <button
-           key={value}
-           onClick={() => handleFilterChange(value)}
-           className={activeCategory === value ? styles.active_button : ""}
-          >
-         {name}
-         </button>
-         ))}
-
+            {categories.map(({ name, value }) => (
+              <button
+                key={value}
+                onClick={() => handleFilterChange(value)}
+                className={activeCategory === value ? styles.active_button : ""}
+              >
+                {name}
+              </button>
+            ))}
           </div>
 
           {/* Product list */}
@@ -234,18 +261,26 @@ const AllProducts = () => {
                   onClick={() => handleToggleWishlist(product)}
                   disabled={isUpdatingWishlist}
                 >
-                  {wishlistItems.includes(product._id) ? <IoHeart color="red" /> : <IoHeartOutline />}
+                  {wishlistItems.includes(product._id) ? (
+                    <IoHeart color="red" />
+                  ) : (
+                    <IoHeartOutline />
+                  )}
                 </button>
                 <Link
-                  to={`/product/${product.slug || generateSlug(product.name)}-${product._id}`}
+                  to={`/product/${product.slug || generateSlug(product.name)}-${
+                    product._id
+                  }`}
                 >
                   <img src={product.images[0]} alt={product.name} />
                   <h2>{product.name}</h2>
                   <p>${product.price}</p>
                   <p className={styles.ratings}>
                     {[...Array(5)].map((_, i) => {
-                      if (i < Math.floor(product.ratings)) return <FaStar key={i} color="gold" />;
-                      else if (i === Math.floor(product.ratings)) return <FaStarHalfAlt key={i} color="gold" />;
+                      if (i < Math.floor(product.ratings))
+                        return <FaStar key={i} color="gold" />;
+                      else if (i === Math.floor(product.ratings))
+                        return <FaStarHalfAlt key={i} color="gold" />;
                       else return <FaRegStar key={i} color="grey" />;
                     })}
                   </p>
@@ -265,24 +300,40 @@ const AllProducts = () => {
           {/* Pagination */}
           <div className={styles.pagination}>
             {currentPage > 1 && (
-              <Button variant="primary" size="small" onClick={() => paginate(1)}>
+              <Button
+                variant="primary"
+                size="small"
+                onClick={() => paginate(1)}
+              >
                 |&lt;&lt;
               </Button>
             )}
             {currentPage > 1 && (
-              <Button variant="primary" size="small" onClick={() => paginate(currentPage - 1)}>
+              <Button
+                variant="primary"
+                size="small"
+                onClick={() => paginate(currentPage - 1)}
+              >
                 &lt;
               </Button>
             )}
             {Array.from({ length: 3 }, (_, i) => {
               const pageNumber = currentPage + i - 1;
-              if (pageNumber > 0 && pageNumber <= Math.ceil(filteredProducts.length / productsPerPage)) {
+              if (
+                pageNumber > 0 &&
+                pageNumber <=
+                  Math.ceil(filteredProducts.length / productsPerPage)
+              ) {
                 return (
                   <Button
                     key={pageNumber}
                     variant="primary"
                     size="small"
-                    className={currentPage === pageNumber ? styles.active_button : undefined}
+                    className={
+                      currentPage === pageNumber
+                        ? styles.active_button
+                        : undefined
+                    }
                     onClick={() => paginate(pageNumber)}
                   >
                     {pageNumber}
@@ -291,16 +342,24 @@ const AllProducts = () => {
               }
               return null;
             })}
-            {currentPage < Math.ceil(filteredProducts.length / productsPerPage) && (
-              <Button variant="primary" size="small" onClick={() => paginate(currentPage + 1)}>
-                &gt;
-              </Button>
-            )}
-            {currentPage < Math.ceil(filteredProducts.length / productsPerPage) && (
+            {currentPage <
+              Math.ceil(filteredProducts.length / productsPerPage) && (
               <Button
                 variant="primary"
                 size="small"
-                onClick={() => paginate(Math.ceil(filteredProducts.length / productsPerPage))}
+                onClick={() => paginate(currentPage + 1)}
+              >
+                &gt;
+              </Button>
+            )}
+            {currentPage <
+              Math.ceil(filteredProducts.length / productsPerPage) && (
+              <Button
+                variant="primary"
+                size="small"
+                onClick={() =>
+                  paginate(Math.ceil(filteredProducts.length / productsPerPage))
+                }
               >
                 &gt;&gt;|
               </Button>

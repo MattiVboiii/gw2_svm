@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import styles from "../../styles/global/CategoryNavigation.module.css";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
-// Define types for clarity
+// Define types
 interface Category {
   _id: string;
   name: string;
@@ -28,8 +29,9 @@ const CategoryNavigation = () => {
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
-  // Fetch both categories and subcategories concurrently
+  // Fetch categories and subcategories concurrently
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -48,17 +50,34 @@ const CategoryNavigation = () => {
     fetchData();
   }, []);
 
-  // Toggle expand/collapse for a given category by ID
+  // Toggle expand/collapse for a given category by its ID
   const toggleCategory = (categoryId: string) => {
     setExpanded((prev) => ({ ...prev, [categoryId]: !prev[categoryId] }));
   };
 
-  // Get subcategories that belong to a given category
+  // Get subcategories for a given category
   const getSubcategoriesFor = (categoryId: string) => {
     return subcategories.filter((sub) => sub.category._id === categoryId);
   };
 
-  // While loading, show a skeleton
+  // Navigate to AllProducts with filter set to the category name (if no subcategories exist)
+  const handleCategoryClick = (categoryName: string) => {
+    navigate(`/allproducts?category=${encodeURIComponent(categoryName)}`);
+  };
+
+  // Navigate to AllProducts with filter set to the subcategory name
+  const handleSubcategoryClick = (
+    subName: string,
+    parentCategoryName: string
+  ) => {
+    navigate(
+      `/allproducts?subcategory=${encodeURIComponent(
+        subName
+      )}&category=${encodeURIComponent(parentCategoryName)}`
+    );
+  };
+
+  // While loading, show skeleton loader
   if (isLoading) {
     return (
       <div className={styles.skeletonContainer}>
@@ -72,30 +91,60 @@ const CategoryNavigation = () => {
   return (
     <nav className={styles.nav}>
       <ul className={styles.categoryList}>
-        {categories.map((category) => (
-          <li key={category._id} className={styles.categoryItem}>
-            <div
-              className={styles.categoryHeader}
-              onClick={() => toggleCategory(category._id)}
-            >
-              <span>{category.name}</span>
-              <button className={styles.chevronButton}>
-                {expanded[category._id] ? <IoIosArrowUp /> : <IoIosArrowDown />}
-              </button>
-            </div>
-            <ul
-              className={`${styles.subcategoryList} ${
-                expanded[category._id] ? styles.expanded : ""
-              }`}
-            >
-              {getSubcategoriesFor(category._id).map((sub) => (
-                <li key={sub._id} className={styles.subcategoryItem}>
-                  {sub.name}
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
+        {categories.map((category) => {
+          const subs = getSubcategoriesFor(category._id);
+          return (
+            <li key={category._id} className={styles.categoryItem}>
+              <div className={styles.categoryHeader}>
+                <span
+                  onClick={() => {
+                    if (subs.length === 0) {
+                      handleCategoryClick(category.name);
+                    } else {
+                      toggleCategory(category._id);
+                    }
+                  }}
+                >
+                  {category.name}
+                </span>
+                {subs.length > 0 && (
+                  <button
+                    className={styles.chevronButton}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent navigation when toggling
+                      toggleCategory(category._id);
+                    }}
+                  >
+                    {expanded[category._id] ? (
+                      <IoIosArrowUp />
+                    ) : (
+                      <IoIosArrowDown />
+                    )}
+                  </button>
+                )}
+              </div>
+              {subs.length > 0 && (
+                <ul
+                  className={`${styles.subcategoryList} ${
+                    expanded[category._id] ? styles.expanded : ""
+                  }`}
+                >
+                  {subs.map((sub) => (
+                    <li
+                      key={sub._id}
+                      className={styles.subcategoryItem}
+                      onClick={() =>
+                        handleSubcategoryClick(sub.name, sub.category.name)
+                      }
+                    >
+                      {sub.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );
