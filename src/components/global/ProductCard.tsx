@@ -2,8 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { IoHeartOutline } from "react-icons/io5";
 import { FaStar, FaRegStar } from "react-icons/fa";
-import styles from "./ProductCard.module.css";
-import Button from "../global/Button";
+import styles from "../../styles/global/ProductCard.module.css";
+import Button from "./Button";
 import { ProductCardProps } from "../../types";
 
 const ProductCard: React.FC<ProductCardProps> = ({
