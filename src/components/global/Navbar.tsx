@@ -90,15 +90,16 @@ const Navbar = () => {
           <li>
             <Link to="/about">About</Link>
           </li>
-          <li>
-            <Link to="/signup">Sign Up</Link>
-          </li>
-          {!token && (
-            <li>
-              <Link to="/signup">Sign Up</Link>
-            </li>
-          )}
-          {token && (
+          {!token ? (
+            <>
+              <li>
+                <Link to="/login">Log In</Link>
+              </li>
+              <li>
+                <Link to="/signup">Sign Up</Link>
+              </li>
+            </>
+          ) : (
             <li>
               <Link
                 to="/"
