@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { IoHeartOutline } from "react-icons/io5";
+import { IoHeart, IoHeartOutline } from "react-icons/io5";
 import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { Product } from "../types";
 import styles from "../styles/home/ProductDetail.module.css";
@@ -8,6 +8,7 @@ import { CiDeliveryTruck } from "react-icons/ci";
 import { GrPowerCycle } from "react-icons/gr";
 import api from "../api";
 import { toast } from "react-toastify";
+import Button from "../components/global/Button";
 
 const ProductDetail = () => {
   // Extract the full slug from the URL
@@ -22,6 +23,10 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColour, setSelectedColour] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<string[]>([]);
+  const [isUpdatingWishlist, setIsUpdatingWishlist] = useState(false);
+
+  const token = localStorage.getItem("token");
 
   // Function to add a product to the cart
   const handleAddToCart = async (product: Product) => {
@@ -32,7 +37,7 @@ const ProductDetail = () => {
           variant.size === selectedSize && variant.color === selectedColour
       ) || product.variants[0];
 
-    if (localStorage.getItem("token")) {
+    if (token) {
       try {
         if (!selectedSize) {
           toast.error("Please select a size");
@@ -51,7 +56,7 @@ const ProductDetail = () => {
           },
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -97,11 +102,46 @@ const ProductDetail = () => {
     }
   };
 
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+  // Fetch wishlist items
+  const fetchWishlist = async () => {
+    if (!token) return;
+    try {
+      const res = await api.get<{ products: { _id: string }[] }>("/wishlist", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const ids = res.data.products.map((p) => p._id);
+      setWishlistItems(ids);
+    } catch (err: any) {
+      toast.error("Error fetching wishlist: " + err.message);
+    }
+  };
+
+  // Toggle wishlist state
+  const handleToggleWishlist = async (product: Product) => {
+    try {
+      setIsUpdatingWishlist(true);
+      if (wishlistItems.includes(product._id)) {
+        await api.delete(`/wishlist/${product._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setWishlistItems((prev) => prev.filter((id) => id !== product._id));
+        toast.success(`${product.name} removed from wishlist!`);
+      } else {
+        await api.post(
+          "/wishlist",
+          { productId: product._id },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setWishlistItems((prev) => [...prev, product._id]);
+        toast.success(`${product.name} added to wishlist!`);
+      }
+    } catch (error: any) {
+      toast.error("Error updating wishlist: " + error.message);
+    } finally {
+      setIsUpdatingWishlist(false);
+    }
   };
 
   useEffect(() => {
@@ -118,6 +158,7 @@ const ProductDetail = () => {
       }
     };
     fetchProducts();
+    fetchWishlist();
   }, [productId]);
 
   if (isLoading) {
@@ -130,11 +171,32 @@ const ProductDetail = () => {
 
   return (
     <div className={styles.product_detail}>
-      <img
-        src={product.images[0]}
-        alt={product.name}
-        className={styles.image}
-      />
+      <div className={styles.images}>
+        <div className={styles.vertical_images}>
+          {product.images.slice(1, 4).map((image, index) => (
+            <img
+              src={image}
+              alt={product.name}
+              key={image}
+              onClick={() => {
+                const newImages = [...product.images];
+                const temp = newImages[0];
+                newImages[0] = newImages[index + 1];
+                newImages[index + 1] = temp;
+                setProduct({
+                  ...product,
+                  images: newImages,
+                });
+              }}
+            />
+          ))}
+        </div>
+        <img
+          src={product.images[0]}
+          alt={product.name}
+          className={styles.main_image}
+        />
+      </div>
       <div className={styles.info}>
         <h1>{product.name}</h1>
         <div className={styles.ratings}>
@@ -202,14 +264,23 @@ const ProductDetail = () => {
             />
             <button onClick={() => setQuantity(quantity + 1)}>+</button>
           </div>
-          <button
-            className={styles.addto_button}
+          <Button
+            variant="primary"
+            size="large"
             onClick={() => handleAddToCart(product)}
           >
-            Buy Now
-          </button>
-          <button className={styles.addto_button}>
-            <IoHeartOutline className={styles.icon} />
+            Add to cart
+          </Button>
+          <button
+            className={styles.wishlist_button}
+            onClick={() => handleToggleWishlist(product)}
+            disabled={isUpdatingWishlist}
+          >
+            {wishlistItems.includes(product._id) ? (
+              <IoHeart />
+            ) : (
+              <IoHeartOutline />
+            )}
           </button>
         </div>
         <div className={styles.delivery}>
