@@ -1,9 +1,9 @@
 .footer_cover {
-  background-color: black;
+  background-color: #611e91;
   width: 100%;
   bottom: 0;
   footer {
-    background-color: black;
+    background-color: #611e91;
     color: white;
     .footer_container {
       display: flex;
