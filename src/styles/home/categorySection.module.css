@@ -72,11 +72,13 @@
 .categoryIcon {
   font-size: 4vh;
   margin-bottom: 1vh;
+  color: var(--black);
 }
 
 .categoryName {
   text-align: center;
   font-size: 1.8vh;
+  color: var(--black);
 }
 
 @media (max-width: 767px) {

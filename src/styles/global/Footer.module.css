@@ -1,9 +1,9 @@
 .footer_cover {
-  background-color: black;
+  background-color: #611e91;
   width: 100%;
   bottom: 0;
   footer {
-    background-color: black;
+    background-color: #611e91;
     color: white;
     .footer_container {
       display: flex;
@@ -55,7 +55,7 @@
     }
     .copyright {
       text-align: center;
-      color: var(--primaryDarkGrey);
+      color: #36124f;
       font-size: 1.5rem;
       padding-bottom: 1vh;
     }
