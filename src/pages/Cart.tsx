@@ -1,29 +1,32 @@
 import { useEffect, useState } from "react";
-import { CartItem } from "../types"; // CartItem should include properties like variantId, selectedSize, and selectedColour
+import { useNavigate } from "react-router-dom";
+import { CartItem, Product } from "../types"; // CartItem should include properties like variantId, selectedSize, and selectedColour
 import styles from "../styles/home/Cart.module.css";
 import { FaTrash } from "react-icons/fa";
 import Button from "../components/global/Button";
 import { updateCartQuantity } from "../utils/updateCartQuantity";
 import api from "../api";
+import { toast } from "react-toastify"; // Import react-toastify
 
 // Key used to store/read the guest cart from localStorage
 const GUEST_CART_KEY = "guestCart";
 
 const Cart = () => {
   // State for the cart items and the loading indicator
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<LocalCartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
   // Retrieve the authentication token from localStorage (if available)
   const token = localStorage.getItem("token");
 
   // Helper function to retrieve guest cart items from localStorage
-  const getGuestCart = (): CartItem[] => {
+  const getGuestCart = (): LocalCartItem[] => {
     const data = localStorage.getItem(GUEST_CART_KEY);
     return data ? JSON.parse(data) : [];
   };
 
   // Helper function to update guest cart items in localStorage
-  const setGuestCart = (items: CartItem[]) => {
+  const setGuestCart = (items: LocalCartItem[]) => {
     localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
   };
 
@@ -160,6 +163,17 @@ const Cart = () => {
     );
   };
 
+  // Function to handle "Proceed to checkout" click
+  const handleProceedCheckout = () => {
+    if (!token) {
+      // Show a toast message for guest users telling them to log in or sign up
+      toast.info("Please log in or sign up to proceed to checkout.");
+    } else {
+      // If the user is logged in, navigate to the checkout page
+      navigate("/checkout");
+    }
+  };
+
   return (
     <div className={styles.container}>
       <h1>Shopping Cart</h1>
@@ -185,7 +199,7 @@ const Cart = () => {
             </thead>
             <tbody>
               {cartItems.map((item) => (
-                <tr key={item._id}>
+                <tr key={`${item.product._id}-${item.variantId}`}>
                   <td>
                     {/* Display product thumbnail */}
                     <img src={item.product.images[0]} alt={item.product.name} />
@@ -265,6 +279,7 @@ const Cart = () => {
                 variant="primary"
                 size="large"
                 className={styles.proceed_checkout}
+                onClick={handleProceedCheckout}
               >
                 Proceed to checkout
               </Button>
@@ -277,3 +292,12 @@ const Cart = () => {
 };
 
 export default Cart;
+
+export interface LocalCartItem {
+  product: Product;
+  variantId: string;
+  quantity: number;
+  _id: string;
+  selectedSize?: string;
+  selectedColour?: string;
+}
