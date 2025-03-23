@@ -7,6 +7,7 @@
 
 .sidebarContainer {
   display: flex;
+  align-items: flex-start;
   width: 100%;
   gap: 1rem; /* adjust gap as needed */
   margin-bottom: 1rem;
@@ -26,8 +27,9 @@
 }
 
 .sidebar {
-  width: 100%; /* sidebar spans full width */
-  margin-bottom: 1rem; /* spacing below the navigation area */
+  width: 100%;
+  display: flex;
+  gap: 1rem;
 }
 
 .mainContent {
