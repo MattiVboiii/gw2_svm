@@ -1,4 +1,4 @@
-import { useEffect } from "react";             
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import type { RootState } from "../store";
 import type { Action } from "redux";
@@ -13,6 +13,8 @@ import Best from "../components/home/BestSelling";
 import FlashSales from "../components/home/FlashSales";
 import styles from "../styles/pages/Homepage.module.css"; // new CSS module for layout
 import HeroSection from "../components/home/HeroSection";
+import ShopBanner from "../components/home/ShopBanner";
+
 const HomePage = () => {
   const dispatch: ThunkDispatch<RootState, undefined, Action> = useDispatch();
   useEffect(() => {
@@ -20,18 +22,19 @@ const HomePage = () => {
   }, [dispatch]);
   return (
     <div className={styles.homeContainer}>
-     <div className={styles.sidebarContainer}>
-    <div className={styles.navContainer}>
-    <CategoryNavigation />
-    </div>
-    <div className={styles.banner}>
-    <HeroSection />
-   </div>
-    </div>
+      <div className={styles.sidebarContainer}>
+        <div className={styles.navContainer}>
+          <CategoryNavigation />
+        </div>
+        <div className={styles.banner}>
+          <HeroSection />
+        </div>
+      </div>
       <main className={styles.mainContent}>
         <FlashSales />
         <CategorySection />
         <Best />
+        <ShopBanner />
         <ExploreProducts />
         <Advantages />
       </main>
