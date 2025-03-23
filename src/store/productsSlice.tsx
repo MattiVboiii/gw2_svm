@@ -12,6 +12,8 @@ const normalizeCategory = (cat: string) =>
 const initialState: ProductsState = {
   products: [],
   filteredProducts: [],
+  flashSales: [],      // Added: flash sales section
+  bestSelling: [],     // Added: best selling section
   currentPage: 1,
   productsPerPage: 5,
 };
@@ -21,6 +23,9 @@ const GET_PRODUCTS = "GET_PRODUCTS";
 const FILTER_PRODUCTS = "FILTER_PRODUCTS";
 const SET_PAGE = "SET_PAGE";
 const SET_PRODUCTS_PER_PAGE = "SET_PRODUCTS_PER_PAGE";
+
+// Added: action for custom sections
+const SET_PRODUCTS_BY_SECTION = "SET_PRODUCTS_BY_SECTION";
 
 // Action creators: functions to dispatch actions
 export const getProducts = (products: Product[]) => ({
@@ -43,11 +48,27 @@ export const setProductsPerPage = (productsPerPage: number) => ({
   payload: productsPerPage,
 });
 
+// Added: assign products into FlashSales & BestSelling (centralized separation)
+export const setProductsBySection = (sections: {
+  flashSales: Product[];
+  bestSelling: Product[];
+}) => ({
+  type: SET_PRODUCTS_BY_SECTION,
+  payload: sections,
+});
+
 // Async action to fetch products from API using Axios
 export const fetchProducts = () => async (dispatch: Dispatch) => {
   try {
     const response = await api.get<Product[]>("/products"); // Fetches products from API
+
+    const shuffled = [...response.data].sort(() => 0.5 - Math.random());
+
+    const flashSales = shuffled.slice(0, 8);     // Use for -35% discount
+    const bestSelling = shuffled.slice(8, 16);   // Use for -20% discount
+
     dispatch(getProducts(response.data));
+    dispatch(setProductsBySection({ flashSales, bestSelling }));
   } catch (error) {
     console.error("Error fetching products:", error);
   }
@@ -70,41 +91,50 @@ const productsReducer = (
         products: action.payload,
         filteredProducts: action.payload, // Initially, filtered products are the same as all products
       };
-     case FILTER_PRODUCTS: {
-  const normalizedCategory = normalizeCategory(action.payload);
 
-  // If category is 'all' or empty, return all products
-  if (!normalizedCategory || normalizedCategory === "all") {
-    return {
-      ...state,
-      filteredProducts: state.products,
-    };
-  }
+    case FILTER_PRODUCTS: {
+      const normalizedCategory = normalizeCategory(action.payload);
 
-  // Otherwise, apply normalized filtering
-  return {
-    ...state,
-    filteredProducts: state.products.filter(
-      (product) =>
-        normalizeCategory(product.category?.name || "") === normalizedCategory
-    ),
-  };
-}
-    
+      // If category is 'all' or empty, return all products
+      if (!normalizedCategory || normalizedCategory === "all") {
+        return {
+          ...state,
+          filteredProducts: state.products,
+        };
+      }
+
+      // Otherwise, apply normalized filtering
+      return {
+        ...state,
+        filteredProducts: state.products.filter(
+          (product) =>
+            normalizeCategory(product.category?.name || "") ===
+            normalizedCategory
+        ),
+      };
+    }
+
+    case SET_PRODUCTS_BY_SECTION:
+      return {
+        ...state,
+        flashSales: action.payload.flashSales,       // Updated: store flash sales
+        bestSelling: action.payload.bestSelling,     // Updated: store best selling
+      };
 
     case SET_PAGE:
       return {
         ...state,
         currentPage: action.payload, // Updates the current page
       };
-    default:
-      return state; // Returns the existing state if action type is unknown
 
     case SET_PRODUCTS_PER_PAGE:
       return {
         ...state,
         productsPerPage: action.payload,
       };
+
+    default:
+      return state; // Returns the existing state if action type is unknown
   }
 };
 
@@ -117,5 +147,11 @@ export const selectCurrentPage = (state: RootState) =>
   state.productsSlice.currentPage;
 export const selectProductsPerPage = (state: RootState) =>
   state.productsSlice.productsPerPage;
+
+// New selectors for distributed product sections
+export const selectFlashSales = (state: RootState) =>
+  state.productsSlice.flashSales;
+export const selectBestSelling = (state: RootState) =>
+  state.productsSlice.bestSelling;
 
 export default productsReducer;
