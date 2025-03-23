@@ -9,18 +9,17 @@
   display: flex;
   align-items: flex-start;
   width: 100%;
-  gap: 1rem; /* adjust gap as needed */
+  gap: 1rem;
   margin-bottom: 1rem;
 }
 
 .navContainer {
-  width: auto; /* navigation takes as much space as needed */
-  /* Optionally add top/left margins here if required */
+  width: auto;
 }
 
 .banner {
-  flex: 1; /* banner takes remaining space */
-  max-width: auto; /* remove any maximum width limitation */
+  flex: 1;
+  max-width: auto;
   display: flex;
   align-items: center;
   justify-content: center;
