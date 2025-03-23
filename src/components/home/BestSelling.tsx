@@ -1,65 +1,26 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom"; // Import Link for navigation
-import api from "../../api"; // Import API client
-import Button from "../global/Button"; // Import global Button component
-import styles from "../../styles/home/BestSelling.module.css"; // Import CSS module
-import { Product } from "../../types"; // Import product type
-import { IoHeartOutline } from "react-icons/io5"; // Icon for wishlist
-import { FaStar, FaRegStar } from "react-icons/fa"; // Icons for ratings
+import { useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectBestSelling } from "../../store/productsSlice";
+import ProductCard from "../global/ProductCard";
+import Button from "../global/Button";
+import styles from "../../styles/home/BestSelling.module.css";
+import { RootState } from "../../store";
+import { Product } from "../../types";
+import { IoChevronForward } from "react-icons/io5";
 
 const BestSelling = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
+  const bestSelling = useSelector((state: RootState) => selectBestSelling(state));
   const [showAll, setShowAll] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // Function to generate slug if missing
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-") // Replace spaces with "-"
-      .replace(/[^a-z0-9-]/g, ""); // Remove special characters
-  };
+  const displayedProducts = showAll ? bestSelling : bestSelling.slice(0, 4);
 
-  // Function to generate old price (if not provided by API)
-  const getOldPrice = (price: number) => {
-    return Math.round(price * 1.2); // Add 20% to current price
-  };
-
-  useEffect(() => {
-    const fetchBestSelling = async () => {
-      try {
-        const response = await api.get<Product[]>("/products"); // Fetch products
-        const shuffled = response.data.sort(() => 0.5 - Math.random());
-        const bestSelling = shuffled.slice(0, 8); // Store 8 best-sellers
-
-        // Ensure slug exists
-        bestSelling.forEach((p) => {
-          if (!p.slug) {
-            p.slug = generateSlug(p.name);
-          }
-        });
-
-        setProducts(bestSelling);
-        setDisplayedProducts(bestSelling.slice(0, 4)); // Initially show only 4 products
-
-        console.log("Fetched Best Selling Products:", bestSelling);
-      } catch (error) {
-        console.error("Error fetching best-selling products:", error);
-      }
-    };
-
-    fetchBestSelling();
-  }, []);
-
-  // Handle View All button
   const handleViewAll = () => {
-    if (!showAll) {
-      setDisplayedProducts(products); // Show all 8 products
-    } else {
-      setDisplayedProducts(products.slice(0, 4)); // Collapse back to 4
-    }
     setShowAll((prev) => !prev);
+  };
+
+  const scrollRight = () => {
+    scrollRef.current?.scrollBy({ left: 600, behavior: "smooth" });
   };
 
   return (
@@ -72,8 +33,6 @@ const BestSelling = () => {
         </div>
         <div className={styles.section_title_container}>
           <h2 className={styles.section_title}>Best Selling Products</h2>
-
-          {/* View All Button */}
           <Button
             variant="primary"
             size="large"
@@ -85,62 +44,35 @@ const BestSelling = () => {
         </div>
       </div>
 
-      {/* Product List */}
-      <div className={styles.product_container}>
+      {/* Product Cards */}
+      <div className={styles.product_container} ref={scrollRef}>
         {displayedProducts.length > 0 ? (
-          displayedProducts.map((product) => (
-            <Link
+          displayedProducts.map((product: Product) => (
+            <ProductCard
               key={product._id}
-              // Use product.slug or generate one if missing, then append the unique product id
-              to={`/product/${product.slug || generateSlug(product.name)}-${
-                product._id
-              }`}
-              className={styles.product_card}
-            >
-              {/* Wishlist Button */}
-              <button
-                className={styles.wishlist_button}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent navigation when clicking the wishlist button
-                }}
-              >
-                <IoHeartOutline />
-              </button>
-
-              {/* Product Image */}
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className={styles.product_image}
-              />
-
-              {/* Product Name */}
-              <h3 className={styles.product_name}>{product.name}</h3>
-
-              {/* Price with old price */}
-              <p className={styles.product_price}>
-                ${product.price}
-                <span className={styles.old_price}>
-                  ${getOldPrice(product.price)}
-                </span>
-              </p>
-
-              {/* Rating */}
-              <div className={styles.product_rating}>
-                {[...Array(5)].map((_, i) =>
-                  i < Math.floor(product.ratings) ? (
-                    <FaStar key={i} color="gold" />
-                  ) : (
-                    <FaRegStar key={i} color="grey" />
-                  )
-                )}
-              </div>
-            </Link>
+              _id={product._id}
+              slug={product.slug}
+              name={product.name}
+              images={product.images}
+              price={product.price}
+              ratings={product.ratings}
+              discountPercentage={20} // Best Selling products get -20%
+              showAddToCart
+            />
           ))
         ) : (
           <p>Loading products...</p>
         )}
       </div>
+
+      {/* Arrow appears only in View All mode */}
+      {showAll && (
+        <div className={styles.arrow_container}>
+          <button type="button" className={styles.arrow_right} onClick={scrollRight}>
+            <IoChevronForward />
+          </button>
+        </div>
+      )}
     </section>
   );
 };
