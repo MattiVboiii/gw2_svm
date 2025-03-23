@@ -13,6 +13,7 @@ import Best from "../components/home/BestSelling";
 import FlashSales from "../components/home/FlashSales";
 import styles from "../styles/pages/Homepage.module.css"; // new CSS module for layout
 import HeroSection from "../components/home/HeroSection";
+import NewArrivals from "../components/home/NewArrivals";
 const HomePage = () => {
   const dispatch: ThunkDispatch<RootState, undefined, Action> = useDispatch();
   useEffect(() => {
@@ -33,6 +34,7 @@ const HomePage = () => {
         <CategorySection />
         <Best />
         <ExploreProducts />
+        <NewArrivals />
         <Advantages />
       </main>
     </div>
