@@ -67,12 +67,19 @@ const Navbar = () => {
   }, [token]);
 
   return (
-    <>
+   <>
+  <div className={styles.topBanner}>
+  <p>
+    Summer Sale For All Swim Suits And Free Express Delivery – OFF 50%!{" "}
+    <a href="/allproducts" className={styles.shopNow}>ShopNow</a>
+  </p>
+  <span className={styles.language}>English ▼</span>
+</div>
+
       <nav>
       <div className={styles.logoContainer}>
   <img src={logo} alt="Urban Indigo Logo" className={styles.logo} />
 </div>
-
         <ul>
           <li>
             <Link to="/">Home</Link>

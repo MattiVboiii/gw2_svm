@@ -93,3 +93,32 @@ nav {
   object-fit: contain;
   margin-right: 1rem;
 }
+.topBanner {
+  background-color: var(--black);
+  color: white;
+  font-size: 1.4rem;
+  padding: 1rem 5vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.topBanner p {
+  margin: 0;
+  font-weight: 400;
+}
+
+.shopNow {
+  color: white;
+  font-weight: 600;
+  text-decoration: underline;
+  margin-left: 0.3rem;
+}
+
+.language {
+  position: absolute;
+  right: 5vw;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
