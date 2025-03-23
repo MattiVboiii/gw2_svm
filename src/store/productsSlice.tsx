@@ -12,8 +12,8 @@ const normalizeCategory = (cat: string) =>
 const initialState: ProductsState = {
   products: [],
   filteredProducts: [],
-  flashSales: [],      // Added: flash sales section
-  bestSelling: [],     // Added: best selling section
+  flashSales: [], // flash sales section
+  bestSelling: [], //  best selling section
   currentPage: 1,
   productsPerPage: 5,
 };
@@ -33,9 +33,14 @@ export const getProducts = (products: Product[]) => ({
   payload: products,
 });
 
-export const filterProducts = (category: string) => ({
+// Updated filterProducts action creator:
+export const filterProducts = (
+  filter:
+    | { type: "category"; value: string }
+    | { type: "subcategory"; value: { sub: string; category: string } }
+) => ({
   type: FILTER_PRODUCTS,
-  payload: category,
+  payload: filter,
 });
 
 export const setPage = (page: number) => ({
@@ -64,8 +69,8 @@ export const fetchProducts = () => async (dispatch: Dispatch) => {
 
     const shuffled = [...response.data].sort(() => 0.5 - Math.random());
 
-    const flashSales = shuffled.slice(0, 8);     // Use for -35% discount
-    const bestSelling = shuffled.slice(8, 16);   // Use for -20% discount
+    const flashSales = shuffled.slice(0, 8); // Use for -35% discount
+    const bestSelling = shuffled.slice(8, 16); // Use for -20% discount
 
     dispatch(getProducts(response.data));
     dispatch(setProductsBySection({ flashSales, bestSelling }));
@@ -92,33 +97,54 @@ const productsReducer = (
         filteredProducts: action.payload, // Initially, filtered products are the same as all products
       };
 
+    //  filterProducts reducer
     case FILTER_PRODUCTS: {
-      const normalizedCategory = normalizeCategory(action.payload);
+      const payload = action.payload;
 
-      // If category is 'all' or empty, return all products
-      if (!normalizedCategory || normalizedCategory === "all") {
+      // Filtering by category
+      if (payload.type === "category") {
+        const normalizedValue = normalizeCategory(payload.value);
+        if (!normalizedValue || normalizedValue === "all") {
+          return {
+            ...state,
+            filteredProducts: state.products,
+          };
+        }
         return {
           ...state,
-          filteredProducts: state.products,
+          filteredProducts: state.products.filter(
+            (product) =>
+              normalizeCategory(product.category?.name || "") ===
+              normalizedValue
+          ),
         };
       }
 
-      // Otherwise, apply normalized filtering
-      return {
-        ...state,
-        filteredProducts: state.products.filter(
-          (product) =>
-            normalizeCategory(product.category?.name || "") ===
-            normalizedCategory
-        ),
-      };
+      // Filtering by subcategory (with parent category)
+      if (payload.type === "subcategory") {
+        const { sub, category } = payload.value;
+        const normalizedSub = normalizeCategory(sub);
+        const normalizedCat = normalizeCategory(category);
+
+        return {
+          ...state,
+          filteredProducts: state.products.filter(
+            (product) =>
+              normalizeCategory(product.subcategory?.name || "") ===
+                normalizedSub &&
+              normalizeCategory(product.category?.name || "") === normalizedCat
+          ),
+        };
+      }
+
+      return state;
     }
 
     case SET_PRODUCTS_BY_SECTION:
       return {
         ...state,
-        flashSales: action.payload.flashSales,       // Updated: store flash sales
-        bestSelling: action.payload.bestSelling,     // Updated: store best selling
+        flashSales: action.payload.flashSales, // store flash sales
+        bestSelling: action.payload.bestSelling, // store best selling
       };
 
     case SET_PAGE:
