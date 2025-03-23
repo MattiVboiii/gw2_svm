@@ -1,16 +1,10 @@
 import { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom"; // Import Link for navigation
-import {
-  IoHeartOutline,
-  IoCartOutline,
-  IoChevronBack,
-  IoChevronForward,
-} from "react-icons/io5"; // Icon
-import { FaStar, FaRegStar } from "react-icons/fa"; // Icons for ratings
+import { IoChevronBack, IoChevronForward } from "react-icons/io5"; // Icon
 import api from "../../api"; // Import global API client
 import Button from "../global/Button"; // Import global Button component
 import styles from "../../styles/home/ExploreProducts.module.css"; // Import CSS module
 import { Product } from "../../types"; // Import product type
+import ProductCard from "../global/ProductCard";
 
 const ExploreProducts = () => {
   const [products, setProducts] = useState<Product[]>([]); // Store product list
@@ -67,32 +61,6 @@ const ExploreProducts = () => {
     }
   };
 
-  // Function to add a product to the cart
-  const handleAddToCart = async (product: Product) => {
-    if (localStorage.getItem("token")) {
-      try {
-        await api.post<{ message: string }>(
-          "/cart",
-          {
-            productId: product._id,
-            variantId: product.variants[0]._id,
-            quantity: 1,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        console.log(`${product.name} added to cart`);
-      } catch (error: any) {
-        console.error("Error adding product to cart:", error.message);
-      }
-    } else {
-      console.log("Please login to add product to cart");
-    }
-  };
-
   return (
     <section className={styles.explore_section}>
       {/* Section Header */}
@@ -122,65 +90,18 @@ const ExploreProducts = () => {
           {/* Product List - Scrollable */}
           <div className={styles.scroll_wrapper}>
             <div className={styles.product_container} ref={containerRef}>
-              {products.length > 0 ? (
-                products.map((product) => (
-                  <Link
-                    key={product._id}
-                    // Updated link to include the unique product ID
-                    to={`/product/${
-                      product.slug || generateSlug(product.name)
-                    }-${product._id}`}
-                    className={styles.product_card}
-                  >
-                    {/* Wishlist Button */}
-                    <button
-                      className={styles.wishlist_button}
-                      onClick={(e) => e.stopPropagation()} // Prevent navigation when clicking
-                    >
-                      <IoHeartOutline />
-                    </button>
-
-                    {/* Product Image */}
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className={styles.product_image}
-                    />
-
-                    {/* Product Name */}
-                    <h3 className={styles.product_name}>{product.name}</h3>
-                    <div className={styles.price_rating_container}>
-                      {/* Price */}
-                      <p className={styles.product_price}>${product.price}</p>
-
-                      {/* Rating */}
-                      <div className={styles.product_rating}>
-                        {[...Array(5)].map((_, i) =>
-                          i < Math.floor(product.ratings) ? (
-                            <FaStar key={i} color="gold" />
-                          ) : (
-                            <FaRegStar key={i} color="grey" />
-                          )
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Add to Cart Button */}
-                    <button
-                      className={styles.add_to_cart}
-                      onClick={(e) => {
-                        handleAddToCart(product);
-                        e.stopPropagation();
-                      }} // Prevent navigation on click
-                    >
-                      <IoCartOutline className={styles.cart_icon} />
-                      <span>Add to Cart</span>
-                    </button>
-                  </Link>
-                ))
-              ) : (
-                <p>No products available</p>
-              )}
+              {products.map((product) => (
+                <ProductCard
+                  key={product._id}
+                  _id={product._id}
+                  slug={product.slug}
+                  name={product.name}
+                  images={product.images}
+                  price={product.price}
+                  ratings={product.ratings}
+                  showAddToCart={true}
+                />
+              ))}
             </div>
           </div>
         </>
