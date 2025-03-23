@@ -70,7 +70,11 @@ export const fetchProducts = () => async (dispatch: Dispatch) => {
     const shuffled = [...response.data].sort(() => 0.5 - Math.random());
 
     const flashSales = shuffled.slice(0, 8); // Use for -35% discount
-    const bestSelling = shuffled.slice(8, 16); // Use for -20% discount
+    // Filter out already used flashSales by _id
+    const flashSaleIds = new Set(flashSales.map((product) => product._id));
+    const remainingProducts = shuffled.filter((p) => !flashSaleIds.has(p._id));
+    const bestSelling = remainingProducts.slice(0, 8); // Use for -20% discount
+
 
     dispatch(getProducts(response.data));
     dispatch(setProductsBySection({ flashSales, bestSelling }));
