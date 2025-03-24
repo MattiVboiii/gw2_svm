@@ -5,10 +5,15 @@ import Button from "../components/global/Button";
 import api from "../api";
 import { FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
+import Modal from "react-modal";
+
+Modal.setAppElement("#root");
 
 const Wishlist = () => {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -35,21 +40,21 @@ const Wishlist = () => {
     }
   }, [token]);
 
-  const handleRemove = async (productId: string) => {
-    if (!token) return;
-    try {
-      await api.delete(`/wishlist/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const updated = wishlistItems.filter((item) => item._id !== productId);
-      setWishlistItems(updated);
-      toast.success("Item removed from wishlist");
-      // Dispatch wishlistUpdated event
-      window.dispatchEvent(new Event("wishlistUpdated"));
-    } catch (error: any) {
-      toast.error("Error removing item from wishlist");
-    }
-  };
+ const handleRemove = async (productId: string) => {
+  if (!token) return;
+  try {
+    await api.delete(`/wishlist/${productId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const itemName = wishlistItems.find((item) => item._id === productId)?.name;
+    const updated = wishlistItems.filter((item) => item._id !== productId);
+    setWishlistItems(updated);
+    toast.success(`${itemName} removed from wishlist`);
+    window.dispatchEvent(new Event("wishlistUpdated"));
+  } catch (error: any) {
+    toast.error("Error removing item from wishlist");
+  }
+};
 
   const handleAddToCart = async (product: Product) => {
     try {
@@ -73,6 +78,13 @@ const Wishlist = () => {
     }
   };
 
+  const handleDelete = () => {
+    if (selectedItemId) {
+      handleRemove(selectedItemId);
+      setShowModal(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <h1>Wishlist</h1>
@@ -87,7 +99,10 @@ const Wishlist = () => {
               <div key={item._id} className={styles.wishlist_card}>
                 <button
                   className={styles.remove_button}
-                  onClick={() => handleRemove(item._id)}
+                  onClick={() => {
+                    setShowModal(true);
+                    setSelectedItemId(item._id);
+                  }}
                 >
                   <FaTrash />
                 </button>
@@ -110,6 +125,45 @@ const Wishlist = () => {
           </div>
         </div>
       )}
+      <Modal
+        isOpen={showModal}
+        onRequestClose={() => setShowModal(false)}
+        style={{
+          content: {
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "2rem",
+            borderRadius: "10px",
+            width: "400px",
+            height: "100px",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          },
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          },
+        }}
+      >
+        <p>
+          Are you sure you want to remove{" "}
+          <span>
+            {wishlistItems.find((item) => item._id === selectedItemId)?.name}
+          </span>{" "}
+          from your wishlist?
+        </p>
+        <div className={styles.modal_buttons}>
+          <Button variant="primary" onClick={handleDelete}>
+            Delete
+          </Button>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };
