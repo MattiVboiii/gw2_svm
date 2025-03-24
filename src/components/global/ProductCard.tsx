@@ -8,6 +8,7 @@ import { ProductCardProps } from "../../types";
 import api from "../../api";
 import { toast } from "react-toastify";
 import { useWishlist } from "../../context/WishlistContext";
+import { useGlobalCounts } from "../../context/GlobalCountsContext"; // <-- Added import
 
 const ProductCard: React.FC<ProductCardProps> = (props) => {
   const {
@@ -27,6 +28,7 @@ const ProductCard: React.FC<ProductCardProps> = (props) => {
   } = props;
 
   const { wishlistItems, refetchWishlist } = useWishlist();
+  const { refreshCounts } = useGlobalCounts(); // <-- Added call
   const [isUpdatingWishlist, setIsUpdatingWishlist] = React.useState(false);
   const token = localStorage.getItem("token");
   const validToken = token && token.trim() !== "" && token !== "undefined";
@@ -51,8 +53,11 @@ const ProductCard: React.FC<ProductCardProps> = (props) => {
         );
         toast.success(`${name} added to wishlist!`);
       }
-      // Refresh the global wishlist
-      refetchWishlist();
+      // Refresh the wishlist state in WishlistContext
+      await refetchWishlist();
+      // Explicitly update the global wishlist counter
+      await refreshCounts();
+      window.dispatchEvent(new Event("wishlistUpdated"));
     } catch (error) {
       toast.error("Error updating wishlist");
     } finally {

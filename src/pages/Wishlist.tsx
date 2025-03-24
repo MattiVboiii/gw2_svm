@@ -40,23 +40,21 @@ const Wishlist = () => {
     }
   }, [token]);
 
-  const handleRemove = async (productId: string) => {
-    if (!token) return; // Do not call API if no token
-    try {
-      await api.delete(`/wishlist/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const updated = wishlistItems.filter((item) => item._id !== productId);
-      setWishlistItems(updated);
-      toast.success(
-        `${
-          wishlistItems.find((item) => item._id === productId)?.name
-        } removed from wishlist`
-      );
-    } catch (error: any) {
-      toast.error("Error removing item from wishlist");
-    }
-  };
+ const handleRemove = async (productId: string) => {
+  if (!token) return;
+  try {
+    await api.delete(`/wishlist/${productId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const itemName = wishlistItems.find((item) => item._id === productId)?.name;
+    const updated = wishlistItems.filter((item) => item._id !== productId);
+    setWishlistItems(updated);
+    toast.success(`${itemName} removed from wishlist`);
+    window.dispatchEvent(new Event("wishlistUpdated"));
+  } catch (error: any) {
+    toast.error("Error removing item from wishlist");
+  }
+};
 
   const handleAddToCart = async (product: Product) => {
     try {

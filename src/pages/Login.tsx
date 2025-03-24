@@ -1,14 +1,16 @@
 import styles from "../styles/home/Login.module.css";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
 import Button from "../components/global/Button";
 import { toast } from "react-toastify";
+import { useGlobalCounts } from "../context/GlobalCountsContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { refreshCounts } = useGlobalCounts();
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -16,12 +18,39 @@ const Login = () => {
     }
   }, [navigate]);
 
+  const syncGuestCart = async (token: string) => {
+    const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
+
+    if (guestCart.length > 0) {
+      for (const item of guestCart) {
+        try {
+          await api.post(
+            "/cart",
+            {
+              productId: item.product._id,
+              variantId: item.variantId,
+              quantity: item.quantity,
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+        } catch (error) {
+          console.error("Error syncing guest cart:", error);
+        }
+      }
+      localStorage.removeItem("guestCart");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!email || !password) {
       toast.error("Please enter an email and password");
       return;
     }
+
     try {
       const { data } = await api.post<{ token: string }>(
         "/users/login",
@@ -32,13 +61,19 @@ const Login = () => {
           },
         }
       );
+
       localStorage.setItem("token", data.token);
-      toast.success(
-        "Successfully logged in! You will be redirected in 3 seconds."
-      );
-      setTimeout(() => window.location.reload(), 3000);
+
+      // Sync guest cart
+      await syncGuestCart(data.token);
+
+      // Refresh cart and wishlist counts
+      await refreshCounts();
+
+      toast.success("Successfully logged in! Redirecting shortly...");
+      setTimeout(() => navigate("/"), 1500);
     } catch (error: any) {
-      if (error.response.status === 401) {
+      if (error.response && error.response.status === 401) {
         toast.error("User not found");
       } else {
         toast.error("Something went wrong");
@@ -78,4 +113,5 @@ const Login = () => {
     </div>
   );
 };
+
 export default Login;

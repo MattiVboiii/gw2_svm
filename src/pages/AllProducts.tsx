@@ -18,6 +18,7 @@ import {
 import api from "../api";
 import Button from "../components/global/Button";
 import { toast } from "react-toastify";
+import { useGlobalCounts } from "../context/GlobalCountsContext";
 
 // Converts a product name to a URL-friendly slug
 const generateSlug = (name: string) =>
@@ -33,6 +34,7 @@ const normalizeCategory = (cat: string) =>
 const AllProducts = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const { refreshCounts } = useGlobalCounts();
 
   // Get category from the URL, like ?category=men-s-fashion
   const params = new URLSearchParams(location.search);
@@ -88,6 +90,9 @@ const AllProducts = () => {
         setWishlistItems((prev) => [...prev, product._id]);
         toast.success(`${product.name} added to wishlist!`);
       }
+      await fetchWishlist();
+      await refreshCounts(); // Explicitly update the global wishlist counter
+      window.dispatchEvent(new Event("wishlistUpdated"));
     } catch (error: any) {
       toast.error("Error updating wishlist: " + error.message);
     } finally {
