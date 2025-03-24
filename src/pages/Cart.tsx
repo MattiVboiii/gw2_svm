@@ -11,6 +11,15 @@ import { toast } from "react-toastify"; // Import react-toastify
 // Key used to store/read the guest cart from localStorage
 const GUEST_CART_KEY = "guestCart";
 
+export interface LocalCartItem {
+  product: Product;
+  variantId: string;
+  quantity: number;
+  _id: string;
+  selectedSize?: string;
+  selectedColour?: string;
+}
+
 const Cart = () => {
   // State for the cart items and the loading indicator
   const [cartItems, setCartItems] = useState<LocalCartItem[]>([]);
@@ -304,12 +313,3 @@ const Cart = () => {
 };
 
 export default Cart;
-
-export interface LocalCartItem {
-  product: Product;
-  variantId: string;
-  quantity: number;
-  _id: string;
-  selectedSize?: string;
-  selectedColour?: string;
-}

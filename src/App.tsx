@@ -1,3 +1,4 @@
+import React from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "/src/styles/global/toastOverride.module.css";
@@ -12,10 +13,11 @@ import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import { Routes, Route } from "react-router";
 import "/src/styles/main.css";
+import { WishlistProvider } from "./context/WishlistContext";
 
 const App = () => {
   return (
-    <>
+    <WishlistProvider>
       <Navbar />
       <Routes>
         <Route path="/" element={<Homepage />} />
@@ -28,7 +30,7 @@ const App = () => {
       </Routes>
       <Footer />
       <ToastContainer />
-    </>
+    </WishlistProvider>
   );
 };
 export default App;

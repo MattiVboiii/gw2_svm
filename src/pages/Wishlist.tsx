@@ -9,47 +9,41 @@ import { toast } from "react-toastify";
 const Wishlist = () => {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (localStorage.getItem("token")) {
+    if (token) {
       (async () => {
         setIsLoading(true);
         try {
           const response = await api.get<{ products: WishlistItem[] }>(
             "/wishlist",
             {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
             }
           );
-          const items = response.data.products;
-          setWishlistItems(items);
+          setWishlistItems(response.data.products);
         } catch (error: any) {
-          toast.error("Error fetching wishlist");
+          toast.error("Error fetching wishlist: " + error.message);
         } finally {
           setIsLoading(false);
         }
       })();
     } else {
+      // For guest users, you can load wishlist from localStorage if needed
       setIsLoading(false);
     }
-  }, []);
+  }, [token]);
 
   const handleRemove = async (productId: string) => {
+    if (!token) return; // Do not call API if no token
     try {
-      const items = wishlistItems.filter((item) => item._id !== productId);
-      setWishlistItems(items);
       await api.delete(`/wishlist/${productId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success(
-        `${
-          wishlistItems.find((i) => i._id === productId)?.name
-        } removed from wishlist`
-      );
+      const updated = wishlistItems.filter((item) => item._id !== productId);
+      setWishlistItems(updated);
+      toast.success("Item removed from wishlist");
     } catch (error: any) {
       toast.error("Error removing item from wishlist");
     }
@@ -81,7 +75,7 @@ const Wishlist = () => {
     <div className={styles.container}>
       <h1>Wishlist</h1>
       {isLoading ? (
-        <p>Loading...</p>
+        <p>Loading wishlist...</p>
       ) : wishlistItems.length === 0 ? (
         <p>Your wishlist is empty</p>
       ) : (
