@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Product, WishlistItem } from "../types";
+import { Product } from "../types";
 import styles from "../styles/home/Wishlist.module.css";
 import Button from "../components/global/Button";
 import api from "../api";
+import { fetchFullWishlistItems } from "../utils/apiHelpers";
 import { FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Modal from "react-modal";
@@ -10,7 +11,8 @@ import Modal from "react-modal";
 Modal.setAppElement("#root");
 
 const Wishlist = () => {
-  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
@@ -21,13 +23,18 @@ const Wishlist = () => {
       (async () => {
         setIsLoading(true);
         try {
-          const response = await api.get<{ products: WishlistItem[] }>(
+          const response = await api.get<{ products: { _id: string }[] }>(
             "/wishlist",
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-          setWishlistItems(response.data.products);
+
+          const wishlistRaw = response.data.products;
+
+          const fullItems = await fetchFullWishlistItems(wishlistRaw);
+
+          setWishlistItems(fullItems);
         } catch (error: any) {
           toast.error("Error fetching wishlist: " + error.message);
         } finally {
@@ -35,7 +42,6 @@ const Wishlist = () => {
         }
       })();
     } else {
-      // For guest users, you can optionally load wishlist from localStorage
       setIsLoading(false);
     }
   }, [token]);
@@ -68,9 +74,7 @@ const Wishlist = () => {
           quantity: 1,
         },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
       await handleRemove(product._id);
@@ -115,33 +119,36 @@ const Wishlist = () => {
         ) : (
           <div className={styles.wishlist_content}>
             <div className={styles.wishlist_cards}>
-              {wishlistItems.map((item) => (
-                <div key={item._id} className={styles.wishlist_card}>
-                  <button
-                    className={styles.remove_button}
-                    onClick={() => {
-                      setShowModal(true);
-                      setSelectedItemId(item._id);
-                    }}
-                  >
-                    <FaTrash />
-                  </button>
-                  <img
-                    src={item.images[0]}
-                    alt={item.name}
-                    className={styles.wishlist_image}
-                  />
-                  <Button
-                    variant="primary"
-                    size="small"
-                    onClick={() => handleAddToCart(item as Product)}
-                  >
-                    Add to Cart
-                  </Button>
-                  <h2>{item.name}</h2>
-                  <p>${item.price}</p>
-                </div>
-              ))}
+              {wishlistItems.map((item) => {
+                console.log("Wishlist item:", item);
+                return (
+                  <div key={item._id} className={styles.wishlist_card}>
+                    <button
+                      className={styles.remove_button}
+                      onClick={() => {
+                        setShowModal(true);
+                        setSelectedItemId(item._id);
+                      }}
+                    >
+                      <FaTrash />
+                    </button>
+                    <img
+                      src={item.images[0]}
+                      alt={item.name}
+                      className={styles.wishlist_image}
+                    />
+                    <Button
+                      variant="primary"
+                      size="small"
+                      onClick={() => handleAddToCart(item as Product)}
+                    >
+                      Add to Cart
+                    </Button>
+                    <h2>{item.name}</h2>
+                    <p>${item.price}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )

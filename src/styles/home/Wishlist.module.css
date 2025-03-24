@@ -6,8 +6,9 @@
     font-weight: bold;
   }
   p {
-    font-size: 1.5rem;
-    margin-top: 2rem;
+    font-size: 2rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
   }
   .wishlist_content {
     display: flex;
@@ -43,6 +44,7 @@
         p {
           font-size: 1.5rem;
           font-weight: bold;
+          color: var(--redAccent);
           margin-bottom: 1vh;
         }
         .remove_button {
