@@ -25,17 +25,6 @@ img {
     margin-bottom: 30px;
     width: 100%;
   }
-  .error {
-    color: black;
-    width: 100%;
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    li {
-      background-color: red;
-      padding: 5px;
-      border: 1px solid black;
-    }
-  }
   input {
     width: 100%;
     border: none;
@@ -44,22 +33,34 @@ img {
     padding: 10px 0;
   }
   button {
-    border: none;
-    border-radius: 0.5rem;
-    background: var(--redAccent);
-    color: white;
-    padding: 2rem;
     width: 100%;
-    transition: all 0.2s ease-in-out;
-    &:hover {
-      background: var(--hoverButton);
-    }
   }
   p:last-child {
     text-align: center;
     margin-top: 30px;
     a {
       color: black;
+      position: relative;
+      transition: all 0.2s ease-in-out;
+      &:hover {
+        color: var(--redAccent);
+      }
+      &::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 0.15vh;
+        bottom: -0.5vh;
+        left: 0;
+        background-color: var(--redAccent);
+        visibility: hidden;
+        transform: scaleX(0);
+        transition: all 0.2s ease-in-out;
+      }
+      &:hover::before {
+        visibility: visible;
+        transform: scaleX(1);
+      }
     }
   }
 }
