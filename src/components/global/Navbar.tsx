@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CiSearch, CiHeart, CiShoppingCart } from "react-icons/ci";
+import { CiHeart, CiShoppingCart } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from "../../styles/global/Navbar.module.css";
@@ -7,14 +7,10 @@ import logo from "../../assets/images/logo.png";
 import { useGlobalCounts } from "../../context/GlobalCountsContext";
 
 const Navbar = () => {
-  const [showSearch, setShowSearch] = useState(false);
+  const [showSearch] = useState(false);
   const { cartCount, wishlistCount } = useGlobalCounts();
   const token = localStorage.getItem("token");
   const validToken = token && token.trim() !== "" && token !== "undefined";
-
-  const handleSearchClick = () => {
-    setShowSearch(!showSearch);
-  };
 
   return (
     <>

@@ -26,6 +26,9 @@ export const GlobalCountsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem("token")
+  );
 
   const refreshCounts = useCallback(async () => {
     const currentToken = localStorage.getItem("token");
@@ -50,7 +53,7 @@ export const GlobalCountsProvider: React.FC<{ children: React.ReactNode }> = ({
         console.error("Error loading counts:", error);
       }
     } else {
-      // Read guest data directly from localStorage every time
+      // Guest flow
       const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
       const guestWishlist = JSON.parse(
         localStorage.getItem("guestWishlist") || "[]"
@@ -76,6 +79,19 @@ export const GlobalCountsProvider: React.FC<{ children: React.ReactNode }> = ({
       window.removeEventListener("wishlistUpdated", updateCounts);
     };
   }, [refreshCounts]);
+
+  // Check for token changes
+  useEffect(() => {
+    const checkTokenInterval = setInterval(() => {
+      const currentToken = localStorage.getItem("token");
+      if (token !== currentToken) {
+        setToken(currentToken);
+        refreshCounts();
+      }
+    }, 500);
+
+    return () => clearInterval(checkTokenInterval);
+  }, [token, refreshCounts]);
 
   return (
     <GlobalCountsContext.Provider
