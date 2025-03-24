@@ -21,7 +21,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColour, setSelectedColour] = useState("");
-  const [errors, setErrors] = useState<string[]>([]);
+  const [errors] = useState<string[]>([]);
 
   // Function to add a product to the cart
   const handleAddToCart = async (product: Product) => {
@@ -97,12 +97,12 @@ const ProductDetail = () => {
     }
   };
 
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-  };
+  // const generateSlug = (name: string) => {
+  //   return name
+  //     .toLowerCase()
+  //     .replace(/[^a-z0-9]+/g, "-")
+  //     .replace(/^-+|-+$/g, "");
+  // };
 
   useEffect(() => {
     const fetchProducts = async () => {

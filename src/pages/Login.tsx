@@ -1,6 +1,6 @@
 import styles from "../styles/home/Login.module.css";
 import { useEffect, useState } from "react";
-import { Link, redirect, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import api from "../api";
 
 const Login = () => {

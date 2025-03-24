@@ -1,14 +1,18 @@
-import { createStore, combineReducers, applyMiddleware } from "redux";
-import {thunk} from "redux-thunk"; // Add redux-thunk for async actions
+// src/store/index.ts
+
+import { configureStore } from "@reduxjs/toolkit";
+import productsReducer from "./productsSlice";
 import logger from "redux-logger";
-import productsSlice from "./productsSlice";
 
-const rootReducer = combineReducers({
-  productsSlice,
-});
+const store = configureStore({
+  reducer: {
+    products: productsReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(logger),
+});  
 
-export type RootState = ReturnType<typeof rootReducer>;
-
-const store = createStore(rootReducer, applyMiddleware(thunk, logger)); // Apply thunk and logger
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
 export default store;

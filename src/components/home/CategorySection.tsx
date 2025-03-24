@@ -52,7 +52,13 @@ const CategorySection: React.FC = () => {
   // When a category is clicked
   const handleCategoryClick = (category: string) => {
     setActiveCategory(category); // Update local active category
-    dispatch(filterProducts(category === "all" ? "" : category));
+    dispatch(
+      filterProducts(
+        category === "all"
+          ? { type: "category", value: "" }
+          : { type: "category", value: category }
+      )
+    );
     navigate(`/allproducts?category=${category}`);
   };
 
