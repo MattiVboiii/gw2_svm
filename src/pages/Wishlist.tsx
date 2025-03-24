@@ -36,7 +36,7 @@ const Wishlist = () => {
   }, [token]);
 
   const handleRemove = async (productId: string) => {
-    if (!token) return; // Do not call API if no token
+    if (!token) return;
     try {
       await api.delete(`/wishlist/${productId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -44,6 +44,8 @@ const Wishlist = () => {
       const updated = wishlistItems.filter((item) => item._id !== productId);
       setWishlistItems(updated);
       toast.success("Item removed from wishlist");
+      // Dispatch wishlistUpdated event
+      window.dispatchEvent(new Event("wishlistUpdated"));
     } catch (error: any) {
       toast.error("Error removing item from wishlist");
     }

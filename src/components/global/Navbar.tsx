@@ -1,63 +1,20 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CiSearch, CiHeart, CiShoppingCart } from "react-icons/ci";
-import { Link } from "react-router-dom"; // using react-router-dom here
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import styles from "/src/styles/global/Navbar.module.css";
-import api from "../../api";
-import logo from "/src/assets/images/logo.png";
-import { useWishlist } from "../../context/WishlistContext";
-
-const GUEST_CART_KEY = "guestCart";
-const GUEST_WISHLIST_KEY = "guestWishlist";
+import styles from "../../styles/global/Navbar.module.css";
+import logo from "../../assets/images/logo.png";
+import { useGlobalCounts } from "../../context/GlobalCountsContext";
 
 const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState(0);
-  const [wishlistItemCount, setWishlistItemCount] = useState(0);
+  const { cartCount, wishlistCount } = useGlobalCounts();
   const token = localStorage.getItem("token");
   const validToken = token && token.trim() !== "" && token !== "undefined";
-  const { wishlistItems } = useWishlist();
 
   const handleSearchClick = () => {
     setShowSearch(!showSearch);
   };
-
-  const loadCartAndWishlistCount = async () => {
-    if (token) {
-      try {
-        const [cartResponse, wishlistResponse] = await Promise.all([
-          api.get<{ items: { quantity: number }[] }>("/cart", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          api.get<{ products: { _id: string }[] }>("/wishlist", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-        const totalQuantity = cartResponse.data.items.reduce(
-          (total, item) => total + item.quantity,
-          0
-        );
-        setCartItemCount(totalQuantity);
-        const totalWishlist = wishlistResponse.data.products.length;
-        setWishlistItemCount(totalWishlist);
-      } catch (error: any) {
-        toast.error("Error fetching cart and wishlist");
-      }
-    } else {
-      // For guest users, retrieve counts from localStorage (if implemented)
-      const guestCart = localStorage.getItem(GUEST_CART_KEY);
-      const guestItems = guestCart ? JSON.parse(guestCart) : [];
-      setCartItemCount(guestItems.length);
-
-      const guestWishlist = localStorage.getItem(GUEST_WISHLIST_KEY);
-      const guestWishlistItems = guestWishlist ? JSON.parse(guestWishlist) : [];
-      setWishlistItemCount(guestWishlistItems.length);
-    }
-  };
-
-  useEffect(() => {
-    loadCartAndWishlistCount();
-  }, [token]);
 
   return (
     <>
@@ -114,7 +71,11 @@ const Navbar = () => {
           )}
         </ul>
         {showSearch && (
-          <input type="text" placeholder="What are you looking for?" />
+          <input
+            type="text"
+            placeholder="What are you looking for?"
+            className={styles.searchInput}
+          />
         )}
         <div className={styles.icons}>
           <Link
@@ -123,10 +84,8 @@ const Navbar = () => {
             style={{ position: "relative" }}
           >
             <CiHeart size={24} />
-            {validToken && wishlistItems.length > 0 && (
-              <span className={styles.wishlist_badge}>
-                {wishlistItems.length}
-              </span>
+            {validToken && wishlistCount > 0 && (
+              <span className={styles.wishlist_badge}>{wishlistCount}</span>
             )}
           </Link>
           <Link
@@ -135,8 +94,8 @@ const Navbar = () => {
             style={{ position: "relative" }}
           >
             <CiShoppingCart size={24} />
-            {validToken && cartItemCount > 0 && (
-              <span className={styles.cart_badge}>{cartItemCount}</span>
+            {cartCount > 0 && (
+              <span className={styles.cart_badge}>{cartCount}</span>
             )}
           </Link>
         </div>

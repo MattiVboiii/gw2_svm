@@ -1,4 +1,3 @@
-import React from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "/src/styles/global/toastOverride.module.css";
@@ -14,23 +13,27 @@ import Login from "./pages/Login";
 import { Routes, Route } from "react-router";
 import "/src/styles/main.css";
 import { WishlistProvider } from "./context/WishlistContext";
+import { GlobalCountsProvider } from "./context/GlobalCountsContext";
 
 const App = () => {
   return (
-    <WishlistProvider>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Homepage />} />
-        <Route path="/allproducts" element={<AllProducts />} />
-        <Route path="/product/:slug" element={<ProductDetail />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
-      <Footer />
-      <ToastContainer />
-    </WishlistProvider>
+    <GlobalCountsProvider>
+      <WishlistProvider>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Homepage />} />
+          <Route path="/allproducts" element={<AllProducts />} />
+          <Route path="/product/:slug" element={<ProductDetail />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+        <Footer />
+        <ToastContainer />
+      </WishlistProvider>
+    </GlobalCountsProvider>
   );
 };
+
 export default App;

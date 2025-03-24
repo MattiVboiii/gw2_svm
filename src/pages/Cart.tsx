@@ -20,106 +20,151 @@ export interface LocalCartItem {
   selectedColour?: string;
 }
 
+// (imports remain unchanged)
+
 const Cart = () => {
-  // State for the cart items and the loading indicator
   const [cartItems, setCartItems] = useState<LocalCartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  // Retrieve the authentication token from localStorage (if available)
   const token = localStorage.getItem("token");
 
-  // Helper function to retrieve guest cart items from localStorage
   const getGuestCart = (): LocalCartItem[] => {
     const data = localStorage.getItem(GUEST_CART_KEY);
     return data ? JSON.parse(data) : [];
   };
 
-  // Helper function to update guest cart items in localStorage
   const setGuestCart = (items: LocalCartItem[]) => {
     localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
   };
 
-  // Function to sync guest cart items with the server when a user logs in
-  const syncGuestCart = async (guestItems: CartItem[]) => {
-    for (const item of guestItems) {
-      try {
-        // Post each guest cart item to the server
-        await api.post<{ message: string }>(
-          "/cart",
-          {
-            productId: item.product._id,
-            variantId: item.variantId,
-            quantity: item.quantity,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      } catch (error: any) {
-        console.error("Error syncing guest cart:", error.message);
-      }
-    }
-    // Remove guest cart from localStorage after syncing
+  const syncGuestCart = async () => {
+    if (!token) return;
+
+    // Read guest items and immediately clear the guest cart to prevent duplicate syncing.
+    const storedGuestItems = getGuestCart();
+    if (storedGuestItems.length === 0) return;
+    // Clear guest cart immediately to avoid re-syncing on subsequent renders.
     localStorage.removeItem(GUEST_CART_KEY);
+
+    try {
+      // Aggregate guest items by product._id and variantId.
+      const aggregatedGuestItems = Object.values(
+        storedGuestItems.reduce((acc, guestItem) => {
+          const key = guestItem.product._id + "-" + guestItem.variantId;
+          if (acc[key]) {
+            acc[key].quantity += guestItem.quantity;
+          } else {
+            acc[key] = { ...guestItem };
+          }
+          return acc;
+        }, {} as Record<string, CartItem>)
+      );
+
+      // Fetch the current server cart.
+      const serverRes = await api.get<{ items: CartItem[] }>("/cart", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const serverItems = serverRes.data.items;
+
+      // Process each aggregated guest item.
+      for (const guestItem of aggregatedGuestItems) {
+        const existingItem = serverItems.find(
+          (item) =>
+            item.product._id === guestItem.product._id &&
+            item.variantId === guestItem.variantId
+        );
+        if (existingItem) {
+          // Merge quantities if item already exists.
+          const newQuantity = existingItem.quantity + guestItem.quantity;
+          try {
+            // Update the server cart item with the new quantity.
+            await api.delete(
+              `/cart/${guestItem.product._id}/${guestItem.variantId}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            await api.post(
+              "/cart",
+              {
+                productId: guestItem.product._id,
+                variantId: guestItem.variantId,
+                quantity: newQuantity,
+              },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+          } catch (updateError: any) {
+            console.error(
+              `Error updating quantity for ${guestItem.product._id}:`,
+              updateError.message
+            );
+          }
+        } else {
+          // Add a new item if it doesn't exist.
+          try {
+            await api.post(
+              "/cart",
+              {
+                productId: guestItem.product._id,
+                variantId: guestItem.variantId,
+                quantity: guestItem.quantity,
+              },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+          } catch (addError: any) {
+            console.error(
+              `Error adding product ${guestItem.product._id}:`,
+              addError.message
+            );
+          }
+        }
+      }
+      // Dispatch the cartUpdated event once after syncing.
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (error: any) {
+      console.error("Error syncing guest cart:", error.message);
+    }
   };
 
-  // Load the cart items when the component mounts or when the token changes
   useEffect(() => {
     const loadCart = async () => {
       if (token) {
-        // Retrieve guest cart items from localStorage
         const guestItems = getGuestCart();
-
-        // If there are guest cart items, synchronize them with the server
         if (guestItems.length > 0) {
-          await syncGuestCart(guestItems);
+          await syncGuestCart();
         }
 
         try {
-          // Fetch the updated cart items from the server using the auth token
           const response = await api.get<{ items: CartItem[] }>("/cart", {
             headers: { Authorization: `Bearer ${token}` },
           });
 
           const items = response.data.items;
-
-          // Combine items with the same product and variant by summing their quantities
           const combinedItems = items.reduce((map, item) => {
             const key = item.product._id + "-" + item.variantId;
             const existingItem = map.get(key);
-
             if (existingItem) {
-              // If an item with the same key exists, sum their quantities
               return map.set(key, {
                 ...item,
                 quantity: existingItem.quantity + item.quantity,
               });
             }
-
-            // Otherwise, set the new item for this key
             return map.set(key, item);
           }, new Map());
 
-          // Update the cartItems state with the combined items
           setCartItems(Array.from(combinedItems.values()));
         } catch (error: any) {
           console.error("Error fetching cart:", error.message);
         } finally {
-          // End the loading state regardless of success or error
           setIsLoading(false);
         }
       } else {
-        // For guest users: load cart items from localStorage
         const guestCart = getGuestCart();
         setCartItems(guestCart);
         setIsLoading(false);
       }
     };
-    // Execute the loadCart function
     loadCart();
   }, [token]);
 
-  // Function to handle removal of an item from the cart
   const handleRemove = async (
     productId: string,
     variantId: string,
@@ -127,32 +172,30 @@ const Cart = () => {
   ) => {
     if (token) {
       try {
-        // Delete the item from the server cart using the provided product and variant IDs
         await api.delete(`/cart/${productId}/${variantId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        // Filter out the removed item from the local state
         const updated = cartItems.filter(
           (item) =>
             !(item.product._id === productId && item.variantId === variantId)
         );
         setCartItems(updated);
+        window.dispatchEvent(new Event("cartUpdated"));
       } catch (error: any) {
         console.error("Error removing item from cart:", error.message);
       }
     } else {
-      // For guest users, remove the item locally and update localStorage
       const updated = cartItems.filter(
         (item) =>
           !(item.product._id === productId && item.variantId === variantId)
       );
       setCartItems(updated);
       setGuestCart(updated);
+      window.dispatchEvent(new Event("cartUpdated"));
       toast.success(`${product.name} removed from cart`);
     }
   };
 
-  // Function to handle quantity changes by calling the updateCartQuantity utility function
   const handleQuantityChange = (
     productId: string,
     variantId: string,
@@ -169,9 +212,11 @@ const Cart = () => {
       quantity
     );
     toast.success(`${product.name} quantity updated to ${quantity}`);
+
+    // Explicitly dispatch the "cartUpdated" event so the Navbar updates immediately.
+    window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  // Function to calculate the total price of all items in the cart
   const calculateTotal = () => {
     return cartItems.reduce(
       (total, item) => total + item.product.price * item.quantity,
@@ -179,13 +224,10 @@ const Cart = () => {
     );
   };
 
-  // Function to handle "Proceed to checkout" click
   const handleProceedCheckout = () => {
     if (!token) {
-      // Show a toast message for guest users telling them to log in or sign up
       toast.info("Please log in or sign up to proceed to checkout.");
     } else {
-      // If the user is logged in, navigate to the checkout page
       navigate("/checkout");
     }
   };
@@ -194,10 +236,8 @@ const Cart = () => {
     <div className={styles.container}>
       <h1>Shopping Cart</h1>
       {isLoading ? (
-        // Show loading message while the cart is being loaded
         <p>Loading...</p>
       ) : cartItems.length === 0 ? (
-        // Inform the user if the cart is empty
         <p>Your cart is empty</p>
       ) : (
         <div className={styles.cart_content}>
@@ -217,11 +257,9 @@ const Cart = () => {
               {cartItems.map((item) => (
                 <tr key={`${item.product._id}-${item.variantId}`}>
                   <td>
-                    {/* Display product thumbnail */}
                     <img src={item.product.images[0]} alt={item.product.name} />
                   </td>
                   <td>
-                    {/* Link to the product detail page */}
                     <a
                       href={`/product/${item.product.name
                         .toLowerCase()
@@ -231,14 +269,12 @@ const Cart = () => {
                     </a>
                   </td>
                   <td>
-                    {/* Show variant details if available */}
                     {item.selectedSize && item.selectedColour
                       ? `${item.selectedSize} / ${item.selectedColour}`
                       : "Default"}
                   </td>
                   <td>${item.product.price}</td>
                   <td>
-                    {/* Quantity selector; triggers handleQuantityChange on change */}
                     <select
                       className={styles.quantity_selector}
                       value={item.quantity}
@@ -260,7 +296,6 @@ const Cart = () => {
                   </td>
                   <td>${item.product.price * item.quantity}</td>
                   <td>
-                    {/* Remove button to delete the item from the cart */}
                     <FaTrash
                       className={styles.remove}
                       size={20}
@@ -289,13 +324,6 @@ const Cart = () => {
               <p>
                 <strong>Total:</strong> <span>${calculateTotal()}</span>
               </p>
-              {/* <p>
-                <strong>Items:</strong>{" "}
-                <span>
-                  {cartItems.reduce((total, item) => total + item.quantity, 0)}
-                </span>
-              </p> */}
-              {/* Button to proceed to checkout */}
               <Button
                 variant="primary"
                 size="large"

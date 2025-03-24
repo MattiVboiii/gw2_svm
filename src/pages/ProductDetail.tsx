@@ -29,7 +29,7 @@ const ProductDetail = () => {
 
   // Function to add a product to the cart
   const handleAddToCart = async (product: Product) => {
-    // Find the matching variant or fallback to first variant (if any)
+    // Find the matching variant or fallback to the first variant.
     const variant =
       product.variants.find(
         (variant) =>
@@ -46,25 +46,26 @@ const ProductDetail = () => {
           toast.error("Please select a colour");
           return;
         }
+        // Authenticated flow.
         await api.post<{ message: string }>(
           "/cart",
           {
             productId: product._id,
             variantId: variant._id,
-            quantity: quantity, // use number from selected quantity
+            quantity: quantity,
           },
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
         toast.success(`${product.name} added to cart`);
+        // Dispatch cartUpdated event after successful update.
+        window.dispatchEvent(new Event("cartUpdated"));
       } catch (error: any) {
         toast.error("Error adding product to cart: " + error.message);
       }
     } else {
-      // Guest cart: Save selected product info to localStorage
+      // Guest cart: Save selected product info to localStorage.
       if (!selectedSize) {
         toast.error("Please select a size");
         return;
@@ -76,8 +77,7 @@ const ProductDetail = () => {
       const guestCartStr = localStorage.getItem("guestCart");
       const guestCart = guestCartStr ? JSON.parse(guestCartStr) : [];
 
-      // Create a new cart item with selected variant information.
-      // Note: _id is generated here as a combination of product and variant IDs to keep it unique.
+      // Create a new cart item; generate a unique _id.
       const newItem = {
         _id: product._id + "-" + variant._id,
         product,
@@ -87,7 +87,7 @@ const ProductDetail = () => {
         selectedColour,
       };
 
-      // If same variant already exists, add to its quantity.
+      // If the same variant already exists, add to its quantity.
       const existingIndex = guestCart.findIndex(
         (item: any) => item.variantId === variant._id
       );
@@ -98,6 +98,8 @@ const ProductDetail = () => {
       }
       localStorage.setItem("guestCart", JSON.stringify(guestCart));
       toast.success(`${product.name} added to guest cart`);
+      // Dispatch cartUpdated event after updating guest cart.
+      window.dispatchEvent(new Event("cartUpdated"));
     }
   };
 
@@ -138,6 +140,8 @@ const ProductDetail = () => {
         setWishlistItems((prev) => [...prev, product._id]);
         toast.success(`${product.name} added to wishlist!`);
       }
+      // Dispatch wishlistUpdated event
+      window.dispatchEvent(new Event("wishlistUpdated"));
     } catch (error: any) {
       toast.error("Error updating wishlist: " + error.message);
     } finally {
