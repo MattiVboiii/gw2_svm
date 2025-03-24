@@ -25,17 +25,6 @@ img {
     margin-bottom: 30px;
     width: 100%;
   }
-  .error {
-    color: black;
-    width: 100%;
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    li {
-      background-color: red;
-      padding: 5px;
-      border: 1px solid black;
-    }
-  }
   input {
     width: 100%;
     border: none;
