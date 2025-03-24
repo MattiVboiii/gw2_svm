@@ -111,7 +111,11 @@ const Cart = () => {
   }, [token]);
 
   // Function to handle removal of an item from the cart
-  const handleRemove = async (productId: string, variantId: string) => {
+  const handleRemove = async (
+    productId: string,
+    variantId: string,
+    product: Product
+  ) => {
     if (token) {
       try {
         // Delete the item from the server cart using the provided product and variant IDs
@@ -135,6 +139,7 @@ const Cart = () => {
       );
       setCartItems(updated);
       setGuestCart(updated);
+      toast.success(`${product.name} removed from cart`);
     }
   };
 
@@ -142,7 +147,8 @@ const Cart = () => {
   const handleQuantityChange = (
     productId: string,
     variantId: string,
-    quantity: number
+    quantity: number,
+    product: Product
   ) => {
     updateCartQuantity(
       token,
@@ -153,6 +159,7 @@ const Cart = () => {
       variantId,
       quantity
     );
+    toast.success(`${product.name} quantity updated to ${quantity}`);
   };
 
   // Function to calculate the total price of all items in the cart
@@ -209,7 +216,7 @@ const Cart = () => {
                     <a
                       href={`/product/${item.product.name
                         .toLowerCase()
-                        .replace(/ /g, "-")}`}
+                        .replace(/ /g, "-")}-${item.product._id}`}
                     >
                       {item.product.name}
                     </a>
@@ -230,7 +237,8 @@ const Cart = () => {
                         handleQuantityChange(
                           item.product._id,
                           item.variantId,
-                          parseInt(e.target.value)
+                          parseInt(e.target.value),
+                          item.product
                         )
                       }
                     >
@@ -248,7 +256,11 @@ const Cart = () => {
                       className={styles.remove}
                       size={20}
                       onClick={() =>
-                        handleRemove(item.product._id, item.variantId)
+                        handleRemove(
+                          item.product._id,
+                          item.variantId,
+                          item.product
+                        )
                       }
                     />
                   </td>
