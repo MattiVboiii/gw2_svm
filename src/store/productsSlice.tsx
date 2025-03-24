@@ -1,19 +1,21 @@
-import { Action } from "redux";
-import { RootState } from ".";
+// src/store/productsSlice.ts
+
+import { AnyAction } from "redux";
 import { Product, ProductsState } from "../types";
 import api from "../api";
 import { Dispatch } from "redux";
+import { RootState } from "./index";
 
-// Normalizes category names into slug format for reliable comparison
+// Utility: Normalizes category names into slug format
 const normalizeCategory = (cat: string) =>
   cat.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
-// Initial state: stores the list of products, filtered products, and current page
+// Initial state
 const initialState: ProductsState = {
   products: [],
   filteredProducts: [],
-  flashSales: [], // flash sales section
-  bestSelling: [], //  best selling section
+  flashSales: [],
+  bestSelling: [],
   currentPage: 1,
   productsPerPage: 5,
 };
@@ -23,17 +25,14 @@ const GET_PRODUCTS = "GET_PRODUCTS";
 const FILTER_PRODUCTS = "FILTER_PRODUCTS";
 const SET_PAGE = "SET_PAGE";
 const SET_PRODUCTS_PER_PAGE = "SET_PRODUCTS_PER_PAGE";
-
-// Added: action for custom sections
 const SET_PRODUCTS_BY_SECTION = "SET_PRODUCTS_BY_SECTION";
 
-// Action creators: functions to dispatch actions
+// Action creators
 export const getProducts = (products: Product[]) => ({
   type: GET_PRODUCTS,
   payload: products,
 });
 
-// Updated filterProducts action creator:
 export const filterProducts = (
   filter:
     | { type: "category"; value: string }
@@ -53,7 +52,6 @@ export const setProductsPerPage = (productsPerPage: number) => ({
   payload: productsPerPage,
 });
 
-// Added: assign products into FlashSales & BestSelling (centralized separation)
 export const setProductsBySection = (sections: {
   flashSales: Product[];
   bestSelling: Product[];
@@ -62,19 +60,16 @@ export const setProductsBySection = (sections: {
   payload: sections,
 });
 
-// Async action to fetch products from API using Axios
+// Async thunk to fetch products
 export const fetchProducts = () => async (dispatch: Dispatch) => {
   try {
-    const response = await api.get<Product[]>("/products"); // Fetches products from API
+    const response = await api.get<Product[]>("/products");
 
     const shuffled = [...response.data].sort(() => 0.5 - Math.random());
-
-    const flashSales = shuffled.slice(0, 8); // Use for -35% discount
-    // Filter out already used flashSales by _id
+    const flashSales = shuffled.slice(0, 8);
     const flashSaleIds = new Set(flashSales.map((product) => product._id));
     const remainingProducts = shuffled.filter((p) => !flashSaleIds.has(p._id));
-    const bestSelling = remainingProducts.slice(0, 8); // Use for -20% discount
-
+    const bestSelling = remainingProducts.slice(0, 8);
 
     dispatch(getProducts(response.data));
     dispatch(setProductsBySection({ flashSales, bestSelling }));
@@ -83,36 +78,26 @@ export const fetchProducts = () => async (dispatch: Dispatch) => {
   }
 };
 
-// Generic action type with payload
-interface ActionWithPayload<T> extends Action {
-  payload: T;
-}
-
-// Reducer: handles state updates based on dispatched actions
+// Reducer (uses AnyAction for compatibility with configureStore)
 const productsReducer = (
   state = initialState,
-  action: ActionWithPayload<any>
-) => {
+  action: AnyAction
+): ProductsState => {
   switch (action.type) {
     case GET_PRODUCTS:
       return {
         ...state,
         products: action.payload,
-        filteredProducts: action.payload, // Initially, filtered products are the same as all products
+        filteredProducts: action.payload,
       };
 
-    //  filterProducts reducer
     case FILTER_PRODUCTS: {
       const payload = action.payload;
 
-      // Filtering by category
       if (payload.type === "category") {
         const normalizedValue = normalizeCategory(payload.value);
         if (!normalizedValue || normalizedValue === "all") {
-          return {
-            ...state,
-            filteredProducts: state.products,
-          };
+          return { ...state, filteredProducts: state.products };
         }
         return {
           ...state,
@@ -124,7 +109,6 @@ const productsReducer = (
         };
       }
 
-      // Filtering by subcategory (with parent category)
       if (payload.type === "subcategory") {
         const { sub, category } = payload.value;
         const normalizedSub = normalizeCategory(sub);
@@ -147,14 +131,14 @@ const productsReducer = (
     case SET_PRODUCTS_BY_SECTION:
       return {
         ...state,
-        flashSales: action.payload.flashSales, // store flash sales
-        bestSelling: action.payload.bestSelling, // store best selling
+        flashSales: action.payload.flashSales,
+        bestSelling: action.payload.bestSelling,
       };
 
     case SET_PAGE:
       return {
         ...state,
-        currentPage: action.payload, // Updates the current page
+        currentPage: action.payload,
       };
 
     case SET_PRODUCTS_PER_PAGE:
@@ -164,24 +148,21 @@ const productsReducer = (
       };
 
     default:
-      return state; // Returns the existing state if action type is unknown
+      return state;
   }
 };
 
-// Selectors: functions to get specific data from Redux state
-export const selectProducts = (state: RootState) =>
-  state.productsSlice.products;
+// Selectors
+export const selectProducts = (state: RootState) => state.products.products;
 export const selectFilteredProducts = (state: RootState) =>
-  state.productsSlice.filteredProducts;
+  state.products.filteredProducts;
 export const selectCurrentPage = (state: RootState) =>
-  state.productsSlice.currentPage;
+  state.products.currentPage;
 export const selectProductsPerPage = (state: RootState) =>
-  state.productsSlice.productsPerPage;
-
-// New selectors for distributed product sections
+  state.products.productsPerPage;
 export const selectFlashSales = (state: RootState) =>
-  state.productsSlice.flashSales;
+  state.products.flashSales || [];
 export const selectBestSelling = (state: RootState) =>
-  state.productsSlice.bestSelling;
+  state.products.bestSelling;
 
 export default productsReducer;
