@@ -35,7 +35,7 @@ const Wishlist = () => {
         }
       })();
     } else {
-      // For guest users, you can load wishlist from localStorage if needed
+      // For guest users, you can optionally load wishlist from localStorage
       setIsLoading(false);
     }
   }, [token]);
@@ -109,40 +109,47 @@ const Wishlist = () => {
       </Button>
       {isLoading ? (
         <p>Loading wishlist...</p>
-      ) : wishlistItems.length === 0 ? (
-        <p>Your wishlist is empty</p>
-      ) : (
-        <div className={styles.wishlist_content}>
-          <div className={styles.wishlist_cards}>
-            {wishlistItems.map((item) => (
-              <div key={item._id} className={styles.wishlist_card}>
-                <button
-                  className={styles.remove_button}
-                  onClick={() => {
-                    setShowModal(true);
-                    setSelectedItemId(item._id);
-                  }}
-                >
-                  <FaTrash />
-                </button>
-                <img
-                  src={item.images[0]}
-                  alt={item.name}
-                  className={styles.wishlist_image}
-                />
-                <Button
-                  variant="primary"
-                  size="small"
-                  onClick={() => handleAddToCart(item as Product)}
-                >
-                  Add to Cart
-                </Button>
-                <h2>{item.name}</h2>
-                <p>${item.price}</p>
-              </div>
-            ))}
+      ) : token ? (
+        wishlistItems.length === 0 ? (
+          <p>Your wishlist is empty</p>
+        ) : (
+          <div className={styles.wishlist_content}>
+            <div className={styles.wishlist_cards}>
+              {wishlistItems.map((item) => (
+                <div key={item._id} className={styles.wishlist_card}>
+                  <button
+                    className={styles.remove_button}
+                    onClick={() => {
+                      setShowModal(true);
+                      setSelectedItemId(item._id);
+                    }}
+                  >
+                    <FaTrash />
+                  </button>
+                  <img
+                    src={item.images[0]}
+                    alt={item.name}
+                    className={styles.wishlist_image}
+                  />
+                  <Button
+                    variant="primary"
+                    size="small"
+                    onClick={() => handleAddToCart(item as Product)}
+                  >
+                    Add to Cart
+                  </Button>
+                  <h2>{item.name}</h2>
+                  <p>${item.price}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )
+      ) : (
+        <p>
+          Looking for your wishlist? Sign in or create an account to see and
+          shop your favourite items.
+        </p>
       )}
       <Modal
         isOpen={showModal}
