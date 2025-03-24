@@ -186,7 +186,7 @@ const Cart = () => {
         );
         setCartItems(updated);
         window.dispatchEvent(new Event("cartUpdated"));
-        toast.success(`${product.name} removed from cart`)
+        toast.success(`${product.name} removed from cart`);
       } catch (error: any) {
         console.error("Error removing item from cart:", error.message);
       }
@@ -238,9 +238,27 @@ const Cart = () => {
     }
   };
 
+  const handleClearCart = async () => {
+    if (!token) return;
+    try {
+      await api.delete("/cart/clear", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCartItems([]);
+      setGuestCart([]);
+      window.dispatchEvent(new Event("cartUpdated"));
+      toast.success("Cart cleared successfully");
+    } catch (error: any) {
+      console.error("Error clearing cart:", error.message);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <h1>Shopping Cart</h1>
+      <Button variant="primary" size="small" onClick={handleClearCart}>
+        Clear Cart
+      </Button>
       {isLoading ? (
         <p>Loading...</p>
       ) : cartItems.length === 0 ? (

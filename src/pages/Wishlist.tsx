@@ -40,21 +40,23 @@ const Wishlist = () => {
     }
   }, [token]);
 
- const handleRemove = async (productId: string) => {
-  if (!token) return;
-  try {
-    await api.delete(`/wishlist/${productId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const itemName = wishlistItems.find((item) => item._id === productId)?.name;
-    const updated = wishlistItems.filter((item) => item._id !== productId);
-    setWishlistItems(updated);
-    toast.success(`${itemName} removed from wishlist`);
-    window.dispatchEvent(new Event("wishlistUpdated"));
-  } catch (error: any) {
-    toast.error("Error removing item from wishlist");
-  }
-};
+  const handleRemove = async (productId: string) => {
+    if (!token) return;
+    try {
+      await api.delete(`/wishlist/${productId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const itemName = wishlistItems.find(
+        (item) => item._id === productId
+      )?.name;
+      const updated = wishlistItems.filter((item) => item._id !== productId);
+      setWishlistItems(updated);
+      toast.success(`${itemName} removed from wishlist`);
+      window.dispatchEvent(new Event("wishlistUpdated"));
+    } catch (error: any) {
+      toast.error("Error removing item from wishlist");
+    }
+  };
 
   const handleAddToCart = async (product: Product) => {
     try {
@@ -78,6 +80,20 @@ const Wishlist = () => {
     }
   };
 
+  const handleClearWishlist = async () => {
+    if (!token) return;
+    try {
+      await api.delete("/wishlist/clear", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setWishlistItems([]);
+      window.dispatchEvent(new Event("wishlistUpdated"));
+      toast.success("Wishlist cleared successfully");
+    } catch (error: any) {
+      console.error("Error clearing wishlist:", error.message);
+    }
+  };
+
   const handleDelete = () => {
     if (selectedItemId) {
       handleRemove(selectedItemId);
@@ -88,6 +104,9 @@ const Wishlist = () => {
   return (
     <div className={styles.container}>
       <h1>Wishlist</h1>
+      <Button variant="primary" size="small" onClick={handleClearWishlist}>
+        Clear Wishlist
+      </Button>
       {isLoading ? (
         <p>Loading wishlist...</p>
       ) : wishlistItems.length === 0 ? (
