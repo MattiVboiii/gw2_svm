@@ -2,6 +2,7 @@ import styles from "../styles/home/Login.module.css";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import api from "../api";
+import Button from "../components/global/Button";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -73,7 +74,9 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
         />
-        <button type="submit">Login</button>
+        <Button variant="primary" size="large">
+          Login
+        </Button>
         <p>
           Don't have an account? <Link to="/signup">Sign up</Link>
         </p>
