@@ -16,7 +16,7 @@ nav {
         font-size: 1.5rem;
         position: relative;
         &:hover {
-          color: var(--redAccent);
+          color: var(--black);
         }
         &::before {
           content: "";
@@ -25,7 +25,7 @@ nav {
           height: 0.15vh;
           bottom: -0.5vh;
           left: 0;
-          background-color: var(--redAccent);
+          background-color: var(--black);
           visibility: hidden;
           transform: scaleX(0);
           transition: all 0.3s ease-in-out;
@@ -53,32 +53,28 @@ nav {
     }
   }
   .icons {
-    li {
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    /* Hover style for the icon links */
+    a:hover {
+      color: var(--redAccent);
+    }
+    .wishlist_badge,
+    .cart_badge {
+      background-color: var(--redAccent);
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 1rem;
+      font-weight: bold;
+      position: absolute;
+      top: -5px;
+      right: -10px;
       display: flex;
       align-items: center;
-      &:hover {
-        color: var(--redAccent);
-      }
-      .wishlist_badge {
-        background-color: var(--redAccent);
-        color: white;
-        padding: 0.25vh 0.5vw;
-        border-radius: 100px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-left: 0.25rem;
-      }
-      .cart_badge {
-        background-color: var(--redAccent);
-        color: white;
-        padding: 0.25vh 0.5vw;
-        border-radius: 100px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-left: 0.25rem;
-      }
+      justify-content: center;
     }
   }
 }

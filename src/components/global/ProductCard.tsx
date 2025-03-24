@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { IoHeartOutline, IoHeart } from "react-icons/io5";
 import { FaStar, FaRegStar } from "react-icons/fa";
@@ -7,47 +7,32 @@ import Button from "./Button";
 import { ProductCardProps } from "../../types";
 import api from "../../api";
 import { toast } from "react-toastify";
+import { useWishlist } from "../../context/WishlistContext";
 
-const ProductCard: React.FC<ProductCardProps> = ({
-  _id,
-  slug,
-  name,
-  images,
-  price,
-  ratings,
-  discountPercentage = 0,
-  showAddToCart = false,
-  showRating = true,
-  showDiscount = true,
-  customLink,
-  className,
-  customImageStyle,
-}) => {
-  const [wishlistItems, setWishlistItems] = useState<string[]>([]);
-  const [isUpdatingWishlist, setIsUpdatingWishlist] = useState(false);
+const ProductCard: React.FC<ProductCardProps> = (props) => {
+  const {
+    _id,
+    slug,
+    name,
+    images,
+    price,
+    ratings,
+    discountPercentage = 0,
+    showAddToCart = false,
+    showRating = true,
+    showDiscount = true,
+    customLink,
+    className,
+    customImageStyle,
+  } = props;
 
+  const { wishlistItems, refetchWishlist } = useWishlist();
+  const [isUpdatingWishlist, setIsUpdatingWishlist] = React.useState(false);
   const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    const fetchWishlist = async () => {
-      if (!token) return;
-      try {
-        const res = await api.get<{ products: { _id: string }[] }>(
-          "/wishlist",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setWishlistItems(res.data.products.map((p) => p._id));
-      } catch (err) {
-        toast.error("Error fetching wishlist");
-      }
-    };
-    fetchWishlist();
-  }, [token]);
+  const validToken = token && token.trim() !== "" && token !== "undefined";
 
   const handleToggleWishlist = async () => {
-    if (!token) {
+    if (!validToken) {
       toast.error("Please log in to manage your wishlist");
       return;
     }
@@ -57,7 +42,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
         await api.delete(`/wishlist/${_id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setWishlistItems((prev) => prev.filter((id) => id !== _id));
         toast.success(`${name} removed from wishlist!`);
       } else {
         await api.post(
@@ -65,9 +49,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
           { productId: _id },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setWishlistItems((prev) => [...prev, _id]);
         toast.success(`${name} added to wishlist!`);
       }
+      // Refresh the global wishlist
+      refetchWishlist();
     } catch (error) {
       toast.error("Error updating wishlist");
     } finally {

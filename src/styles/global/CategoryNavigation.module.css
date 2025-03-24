@@ -36,7 +36,7 @@
 }
 
 .categoryHeader:hover {
-  background-color: var(--redAccent);
+  background-color: var(--black);
   color: var(--primaryWhite);
 }
 
@@ -74,7 +74,7 @@
 }
 
 .subcategoryItem:hover {
-  color: var(--redAccent);
+  color: var(--black);
 }
 
 /* Skeleton loading styles */

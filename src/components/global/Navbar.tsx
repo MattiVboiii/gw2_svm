@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { CiSearch, CiHeart, CiShoppingCart } from "react-icons/ci";
-import { Link } from "react-router";
+import { Link } from "react-router-dom"; // using react-router-dom here
 import { toast } from "react-toastify";
 import styles from "/src/styles/global/Navbar.module.css";
-import api from "../../api"; // Import your API utility
+import api from "../../api";
 import logo from "/src/assets/images/logo.png";
+import { useWishlist } from "../../context/WishlistContext";
+
 const GUEST_CART_KEY = "guestCart";
 const GUEST_WISHLIST_KEY = "guestWishlist";
 
@@ -13,12 +15,13 @@ const Navbar = () => {
   const [cartItemCount, setCartItemCount] = useState(0);
   const [wishlistItemCount, setWishlistItemCount] = useState(0);
   const token = localStorage.getItem("token");
+  const validToken = token && token.trim() !== "" && token !== "undefined";
+  const { wishlistItems } = useWishlist();
 
   const handleSearchClick = () => {
     setShowSearch(!showSearch);
   };
 
-  // Function to load the cart and count total items
   const loadCartAndWishlistCount = async () => {
     if (token) {
       try {
@@ -26,39 +29,29 @@ const Navbar = () => {
           api.get<{ items: { quantity: number }[] }>("/cart", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          api.get<{ products: { id: number }[] }>("/wishlist", {
+          api.get<{ products: { _id: string }[] }>("/wishlist", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
-
-        // Calculate total quantity of all items in the cart
         const totalQuantity = cartResponse.data.items.reduce(
           (total, item) => total + item.quantity,
           0
         );
         setCartItemCount(totalQuantity);
-
-        // Calculate total quantity of all items in the wishlist
-        const totalWishlistQuantity = wishlistResponse.data.products.length;
-        setWishlistItemCount(totalWishlistQuantity);
-      } catch (error) {
-        toast.error("Error fetching cart and wishlist:");
+        const totalWishlist = wishlistResponse.data.products.length;
+        setWishlistItemCount(totalWishlist);
+      } catch (error: any) {
+        toast.error("Error fetching cart and wishlist");
       }
     } else {
-      // Load guest cart and wishlist from localStorage
+      // For guest users, retrieve counts from localStorage (if implemented)
       const guestCart = localStorage.getItem(GUEST_CART_KEY);
       const guestItems = guestCart ? JSON.parse(guestCart) : [];
-
-      // Calculate total quantity of guest cart items
-      const totalQuantity = guestItems.length;
-      setCartItemCount(totalQuantity);
+      setCartItemCount(guestItems.length);
 
       const guestWishlist = localStorage.getItem(GUEST_WISHLIST_KEY);
       const guestWishlistItems = guestWishlist ? JSON.parse(guestWishlist) : [];
-
-      // Calculate total quantity of guest wishlist items
-      const totalWishlistQuantity = guestWishlistItems.length;
-      setWishlistItemCount(totalWishlistQuantity);
+      setWishlistItemCount(guestWishlistItems.length);
     }
   };
 
@@ -67,22 +60,28 @@ const Navbar = () => {
   }, [token]);
 
   return (
-   <>
-  <div className={styles.topBanner}>
-  <p>
-    Summer Sale For All Swim Suits And Free Express Delivery – OFF 50%!{" "}
-    <a href="/allproducts" className={styles.shopNow}>ShopNow</a>
-  </p>
-  <span className={styles.language}>English ▼</span>
-</div>
-
-      <nav>
-      <div className={styles.logoContainer}>
-  <img src={logo} alt="Urban Indigo Logo" className={styles.logo} />
-</div>
-        <ul>
+    <>
+      <div className={styles.topBanner}>
+        <p>
+          Summer Sale For All Swim Suits And Free Express Delivery – OFF 50%!{" "}
+          <Link to="/allproducts" className={styles.shopNow}>
+            Shop Now
+          </Link>
+        </p>
+        <span className={styles.language}>English ▼</span>
+      </div>
+      <nav className={styles.navbar}>
+        <div className={styles.logoContainer}>
+          <Link to="/">
+            <img src={logo} alt="Logo" className={styles.logo} />
+          </Link>
+        </div>
+        <ul className={styles.navLinks}>
           <li>
             <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/allproducts">Products</Link>
           </li>
           <li>
             <Link to="/contact">Contact</Link>
@@ -117,31 +116,30 @@ const Navbar = () => {
         {showSearch && (
           <input type="text" placeholder="What are you looking for?" />
         )}
-        <ul className={styles.icons}>
-          <li>
-            <CiSearch
-              size={20}
-              className="search-icon"
-              onClick={handleSearchClick}
-            />
-          </li>
-          <li>
-            <Link to="/wishlist" className={styles.wishlist_link}>
-              <CiHeart size={20} className={styles.wishlist_icon} />
-            </Link>
-            {wishlistItemCount > 0 && (
-              <span className={styles.wishlist_badge}>{wishlistItemCount}</span>
+        <div className={styles.icons}>
+          <Link
+            to="/wishlist"
+            className={styles.wishlist}
+            style={{ position: "relative" }}
+          >
+            <CiHeart size={24} />
+            {validToken && wishlistItems.length > 0 && (
+              <span className={styles.wishlist_badge}>
+                {wishlistItems.length}
+              </span>
             )}
-          </li>
-          <li>
-            <Link to="/cart" className={styles.cart_link}>
-              <CiShoppingCart size={20} className={styles.cart_icon} />
-            </Link>
-            {cartItemCount > 0 && (
+          </Link>
+          <Link
+            to="/cart"
+            className={styles.cart}
+            style={{ position: "relative" }}
+          >
+            <CiShoppingCart size={24} />
+            {validToken && cartItemCount > 0 && (
               <span className={styles.cart_badge}>{cartItemCount}</span>
             )}
-          </li>
-        </ul>
+          </Link>
+        </div>
       </nav>
     </>
   );

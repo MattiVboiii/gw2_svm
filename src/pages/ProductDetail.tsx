@@ -117,6 +117,10 @@ const ProductDetail = () => {
 
   // Toggle wishlist state
   const handleToggleWishlist = async (product: Product) => {
+    if (!token) {
+      toast.error("Please log in to manage your wishlist");
+      return;
+    }
     try {
       setIsUpdatingWishlist(true);
       if (wishlistItems.includes(product._id)) {
@@ -129,9 +133,7 @@ const ProductDetail = () => {
         await api.post(
           "/wishlist",
           { productId: product._id },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         setWishlistItems((prev) => [...prev, product._id]);
         toast.success(`${product.name} added to wishlist!`);
