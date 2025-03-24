@@ -8,7 +8,8 @@ import { ProductCardProps } from "../../types";
 import api from "../../api";
 import { toast } from "react-toastify";
 import { useWishlist } from "../../context/WishlistContext";
-import { useGlobalCounts } from "../../context/GlobalCountsContext"; // <-- Added import
+import { useGlobalCounts } from "../../context/GlobalCountsContext";
+import { useNavigate } from "react-router-dom";
 
 const ProductCard: React.FC<ProductCardProps> = (props) => {
   const {
@@ -32,6 +33,11 @@ const ProductCard: React.FC<ProductCardProps> = (props) => {
   const [isUpdatingWishlist, setIsUpdatingWishlist] = React.useState(false);
   const token = localStorage.getItem("token");
   const validToken = token && token.trim() !== "" && token !== "undefined";
+  const navigate = useNavigate();
+
+  const navigateToProductPage = () => {
+    navigate(link);
+  };
 
   const handleToggleWishlist = async () => {
     if (!validToken) {
@@ -141,9 +147,9 @@ const ProductCard: React.FC<ProductCardProps> = (props) => {
           variant="primary"
           size="small"
           className={styles.add_to_cart}
-          onClick={handleAddToCart}
+          onClick={navigateToProductPage}
         >
-          Add To Cart
+          View Details
         </Button>
       )}
     </div>
