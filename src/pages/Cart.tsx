@@ -7,6 +7,9 @@ import Button from "../components/global/Button";
 import { updateCartQuantity } from "../utils/updateCartQuantity";
 import api from "../api";
 import { toast } from "react-toastify"; // Import react-toastify
+import Modal from "react-modal";
+
+Modal.setAppElement("#root");
 
 // Key used to store/read the guest cart from localStorage
 const GUEST_CART_KEY = "guestCart";
@@ -24,6 +27,8 @@ const Cart = () => {
   // State for the cart items and the loading indicator
   const [cartItems, setCartItems] = useState<LocalCartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const navigate = useNavigate();
   // Retrieve the authentication token from localStorage (if available)
   const token = localStorage.getItem("token");
@@ -137,6 +142,7 @@ const Cart = () => {
             !(item.product._id === productId && item.variantId === variantId)
         );
         setCartItems(updated);
+        toast.success(`${product.name} removed from cart`);
       } catch (error: any) {
         console.error("Error removing item from cart:", error.message);
       }
@@ -264,19 +270,63 @@ const Cart = () => {
                     <FaTrash
                       className={styles.remove}
                       size={20}
-                      onClick={() =>
-                        handleRemove(
-                          item.product._id,
-                          item.variantId,
-                          item.product
-                        )
-                      }
+                      onClick={() => {
+                        setSelectedItemId(
+                          `${item.product._id}-${item.variantId}`
+                        );
+                        setShowModal(true);
+                      }}
                     />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          <Modal
+            isOpen={showModal}
+            onRequestClose={() => setShowModal(false)}
+            style={{
+              content: {
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "2rem",
+                borderRadius: "10px",
+                width: "400px",
+                height: "100px",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+              },
+              overlay: {
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+              },
+            }}
+          >
+            <p>Are you sure you want to remove this item from your cart?</p>
+            <div className={styles.modal_buttons}>
+              <Button variant="secondary" onClick={() => setShowModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  const [productId, variantId] = selectedItemId!.split("-");
+                  const item = cartItems.find(
+                    (item) =>
+                      item.product._id === productId &&
+                      item.variantId === variantId
+                  );
+                  if (item) handleRemove(productId, variantId, item.product);
+                  setShowModal(false);
+                }}
+              >
+                Remove
+              </Button>
+            </div>
+          </Modal>
           <div>
             <div className={styles.cart_total}>
               <h2>Cart Total</h2>
