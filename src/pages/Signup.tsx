@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import api from "../api";
 import Button from "../components/global/Button";
+import signuploginCover from "../assets/signuplogin_cover.jpg"; // <-- Import the image
 
 const Signup = () => {
   const [firstName, setFirstName] = useState("");
@@ -57,7 +58,7 @@ const Signup = () => {
 
   return (
     <div className={styles.signup_container}>
-      <img src="/src/assets/signuplogin_cover.jpg" alt="" />
+      <img src={signuploginCover} alt="" /> {/* Use imported image */}
       <form className={styles.signup_form} onSubmit={handleSubmit}>
         <h1>Create an account</h1>
         <p>Enter your details below:</p>
