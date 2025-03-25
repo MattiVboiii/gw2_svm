@@ -30,7 +30,7 @@ const ProductCard: React.FC<ProductCardProps> = (props) => {
 
   const { wishlistItems, refetchWishlist } = useWishlist();
   const { refreshCounts } = useGlobalCounts(); // <-- Added call
-  const [isUpdatingWishlist, setIsUpdatingWishlist] = React.useState(false);
+  const [, setIsUpdatingWishlist] = React.useState(false);
   const token = localStorage.getItem("token");
   const validToken = token && token.trim() !== "" && token !== "undefined";
   const navigate = useNavigate();
@@ -71,18 +71,18 @@ const ProductCard: React.FC<ProductCardProps> = (props) => {
     }
   };
 
-  const handleAddToCart = async () => {
-    try {
-      await api.post(
-        "/cart",
-        { productId: _id, quantity: 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success(`${name} added to cart!`);
-    } catch (error) {
-      toast.error("Error adding to cart");
-    }
-  };
+  // const handleAddToCart = async () => {
+  //   try {
+  //     await api.post(
+  //       "/cart",
+  //       { productId: _id, quantity: 1 },
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+  //     toast.success(`${name} added to cart!`);
+  //   } catch (error) {
+  //     toast.error("Error adding to cart");
+  //   }
+  // };
 
   const generatedSlug =
     slug ||
