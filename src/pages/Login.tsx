@@ -5,6 +5,7 @@ import api from "../api";
 import Button from "../components/global/Button";
 import { toast } from "react-toastify";
 import { useGlobalCounts } from "../context/GlobalCountsContext";
+import signuploginCover from "../assets/signuplogin_cover.jpg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -83,7 +84,7 @@ const Login = () => {
 
   return (
     <div className={styles.login_container}>
-      <img src="/src/assets/signuplogin_cover.jpg" alt="" />
+      <img src={signuploginCover} alt="" />
       <form className={styles.login_form} onSubmit={handleSubmit}>
         <h1>Login</h1>
         <p>Enter your details below:</p>
