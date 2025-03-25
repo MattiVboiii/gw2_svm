@@ -166,6 +166,21 @@ const ProductDetail = () => {
     fetchWishlist();
   }, [productId]);
 
+  // New useEffect: Automatically select size and colour if only one of each is available.
+  useEffect(() => {
+    if (!product) return;
+
+    const uniqueSizes = [...new Set(product.variants.map((v) => v.size))];
+    if (uniqueSizes.length === 1) {
+      setSelectedSize(uniqueSizes[0]);
+    }
+
+    const uniqueColors = [...new Set(product.variants.map((v) => v.color))];
+    if (uniqueColors.length === 1) {
+      setSelectedColour(uniqueColors[0]);
+    }
+  }, [product]);
+
   if (isLoading) {
     return <p>Loading...</p>;
   }
