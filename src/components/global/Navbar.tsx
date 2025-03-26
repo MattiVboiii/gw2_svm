@@ -1,16 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CiHeart, CiShoppingCart } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from "../../styles/global/Navbar.module.css";
 import logo from "../../assets/images/logo.png";
 import { useGlobalCounts } from "../../context/GlobalCountsContext";
+import api from "../../api";
 
 const Navbar = () => {
   const [showSearch] = useState(false);
   const { cartCount, wishlistCount } = useGlobalCounts();
   const token = localStorage.getItem("token");
   const validToken = token && token.trim() !== "" && token !== "undefined";
+
+  // Placeholder for user image URL
+  const defaultImage =
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Windows_10_Default_Profile_Picture.svg/2048px-Windows_10_Default_Profile_Picture.svg.png";
+  const [userImage, setUserImage] = useState(defaultImage);
+  useEffect(() => {
+    const fetchUserImage = async () => {
+      if (validToken) {
+        try {
+          const res = await api.get<{ image: string }>("/users", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUserImage(res.data.image || defaultImage);
+        } catch (error) {
+          console.error("Error fetching user image:", error);
+        }
+      }
+    };
+    fetchUserImage();
+  }, [validToken, token]);
 
   return (
     <>
@@ -93,6 +114,14 @@ const Navbar = () => {
             {cartCount > 0 && (
               <span className={styles.cart_badge}>{cartCount}</span>
             )}
+          </Link>
+          <Link to="/account" className={styles.account}>
+            <img
+              src={userImage ?? defaultImage}
+              height={30}
+              width={30}
+              alt=""
+            />
           </Link>
         </div>
       </nav>
