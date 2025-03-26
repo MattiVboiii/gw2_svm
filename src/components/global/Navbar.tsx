@@ -6,6 +6,7 @@ import styles from "../../styles/global/Navbar.module.css";
 import logo from "../../assets/images/logo.png";
 import { useGlobalCounts } from "../../context/GlobalCountsContext";
 import api from "../../api";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
   const [showSearch] = useState(false);
@@ -17,19 +18,39 @@ const Navbar = () => {
   const defaultImage =
     "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Windows_10_Default_Profile_Picture.svg/2048px-Windows_10_Default_Profile_Picture.svg.png";
   const [userImage, setUserImage] = useState(defaultImage);
+
   useEffect(() => {
     const fetchUserImage = async () => {
-      if (validToken) {
-        try {
-          const res = await api.get<{ image: string }>("/users", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setUserImage(res.data.image || defaultImage);
-        } catch (error) {
-          console.error("Error fetching user image:", error);
+      if (!validToken) return;
+
+      try {
+        // Decode the token to extract the user ID
+        const decodedToken = jwtDecode<{ userId: string }>(token);
+        const userId = decodedToken?.userId;
+
+        if (!userId) {
+          console.error("User ID not found in token.");
+          return;
         }
+
+        // Fetch all users (since we can't query just one)
+        const res = await api.get("/users", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data && Array.isArray(res.data)) {
+          // Find the current user by matching the decoded user ID
+          const user = res.data.find((u) => u._id === userId);
+
+          if (user && user.image) {
+            setUserImage(user.image);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user image:", error);
       }
     };
+
     fetchUserImage();
   }, [validToken, token]);
 
@@ -116,12 +137,7 @@ const Navbar = () => {
             )}
           </Link>
           <Link to="/account" className={styles.account}>
-            <img
-              src={userImage ?? defaultImage}
-              height={30}
-              width={30}
-              alt=""
-            />
+            <img src={userImage ? userImage : defaultImage} alt="" />
           </Link>
         </div>
       </nav>
